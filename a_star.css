@@ -1,0 +1,60 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    padding: 20px; 
+}
+
+.controls {
+    margin-bottom: 50px;
+}
+
+#map {
+    display: grid;
+    margin: 0 auto;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #b48282;
+    cursor: pointer;
+}
+
+.cell.start {
+    background-color: green;
+}
+
+.cell.end {
+    background-color: red;
+}
+
+.cell.wall {
+    background-color: black;
+}
+
+.cell.path {
+    background-color: blue;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #93e473;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #1c7923;
+}
+
+button.clear {
+    background-color: #dc3545;
+}
+
+button.clear:hover {
+    background-color: #b02a37;
+}
