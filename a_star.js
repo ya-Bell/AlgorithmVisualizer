@@ -50,7 +50,10 @@ function startPathfinding() {
     
     const path = bfs(map, start, end);
     if (path) {
-        path.forEach(([row, col]) => map[row][col].classList.add('path'));
+        path.forEach(([row, col],index) => {
+            if (row === end.row && col === end.col) return;
+            map[row][col].classList.add('path');
+        });
     } else {
         alert("Путь не найден!");
     }
