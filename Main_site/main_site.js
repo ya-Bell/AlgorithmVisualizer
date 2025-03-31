@@ -9,6 +9,5 @@ function loadAlgorithm(algorithm) {
         "solution_tree": "<h2>Дерево решений</h2><p>ДДДДД</p>",
         "neural_network": "<h2>Нейронные сети</h2><p>ЕЕЕЕЕ</p>",
     };
-
     contentDiv.innerHTML = algorithms[algorithm];
 }
