@@ -4,6 +4,12 @@ document.getElementById('generate-map').addEventListener('click', generateMap);
 document.getElementById('start-pathfinding').addEventListener('click', startPathfinding);
 document.getElementById('clear-map').addEventListener('click', clearMap);
 
+document.getElementById('size').addEventListener('input', function () {
+    let value = parseInt(this.value);
+    if (isNaN(value) || value < 1) this.value = 1;
+    if (value > 100) this.value = 100;
+});
+
 function generateMap() {
     const size = +document.getElementById('size').value;
     map = [];
@@ -47,16 +53,22 @@ function handleCellClick(cell, row, col) {
 
 function startPathfinding() {
     if (!start || !end) return alert("Не установлены начальная и конечная точки!");
-    
+
     const path = bfs(map, start, end);
     if (path) {
-        path.forEach(([row, col],index) => {
-            if (row === end.row && col === end.col) return;
-            map[row][col].classList.add('path');
-        });
+        animatePath(path);
     } else {
         alert("Путь не найден!");
     }
+}
+
+function animatePath(path) {
+    path.forEach(([row, col], index) => {
+        if (row === end.row && col === end.col) return;
+        setTimeout(() => {
+            map[row][col].classList.add('path');
+        }, index * 30);
+    });
 }
 
 function bfs(map, start, end) {

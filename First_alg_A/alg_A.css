@@ -19,6 +19,7 @@ body {
     height: 30px;
     border: 2px solid #b48282;
     cursor: pointer;
+    transition: background-color 0.01s ease-in-out;
 }
 
 .cell.start {
@@ -35,11 +36,21 @@ body {
 
 .cell.path {
     background-color: blue;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        background-color: white;
+    }
+    to {
+        background-color: blue;
+    }
 }
 
 button {
     padding: 10px 20px;
-    background-color: #93e473;
+    background-color: #3ebcc5;
     color: white;
     border: none;
     cursor: pointer;
@@ -48,13 +59,13 @@ button {
 }
 
 button:hover {
-    background-color: #1c7923;
+    background-color: #100977;
 }
 
 button.clear {
-    background-color: #dc3545;
+    background-color: #c04b57;
 }
 
 button.clear:hover {
-    background-color: #b02a37;
+    background-color: #99101e;
 }
