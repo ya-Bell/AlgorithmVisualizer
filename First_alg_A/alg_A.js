@@ -1,13 +1,16 @@
 let map = [], start = null, end = null;
+let isDrawingWalls = false;
 
 document.getElementById('generate-map').addEventListener('click', generateMap);
+document.getElementById('generate-maze').addEventListener('click', generateMaze);
 document.getElementById('start-pathfinding').addEventListener('click', startPathfinding);
 document.getElementById('clear-map').addEventListener('click', clearMap);
+document.getElementById('toggle-instruction').addEventListener('click', toggleInstruction);
 
 document.getElementById('size').addEventListener('input', function () {
     let value = parseInt(this.value);
-    if (isNaN(value) || value < 1) this.value = 1;
-    if (value > 100) this.value = 100;
+    if (isNaN(value) || value < 2) this.value = 2;
+    if (value > 50) this.value = 50;
 });
 
 function generateMap() {
@@ -15,8 +18,8 @@ function generateMap() {
     map = [];
     const container = document.getElementById('map');
     container.innerHTML = '';
-    container.style.gridTemplateColumns = `repeat(${size}, 30px)`;
-    container.style.gridTemplateRows = `repeat(${size}, 30px)`;
+    container.style.gridTemplateColumns = `repeat(${size}, 40px)`;
+    container.style.gridTemplateRows = `repeat(${size}, 40px)`;
 
     for (let row = 0; row < size; row++) {
         const rowArray = [];
@@ -25,12 +28,18 @@ function generateMap() {
             cell.classList.add('cell');
             cell.dataset.row = row;
             cell.dataset.col = col;
-            cell.addEventListener('click', () => handleCellClick(cell, row, col));
+            cell.addEventListener('mousedown', () => handleCellClick(cell, row, col));
+            cell.addEventListener('mouseover', () => {
+                if (isDrawingWalls) cell.classList.add('wall');
+            });
             rowArray.push(cell);
             container.appendChild(cell);
         }
         map.push(rowArray);
     }
+
+    document.addEventListener('mousedown', () => isDrawingWalls = true);
+    document.addEventListener('mouseup', () => isDrawingWalls = false);
 }
 
 function handleCellClick(cell, row, col) {
@@ -64,10 +73,11 @@ function startPathfinding() {
 
 function animatePath(path) {
     path.forEach(([row, col], index) => {
-        if (row === end.row && col === end.col) return;
         setTimeout(() => {
-            map[row][col].classList.add('path');
-        }, index * 30);
+            if (!(row === start.row && col === start.col) && !(row === end.row && col === end.col)) {
+                map[row][col].classList.add('path');
+            }
+        }, index * 50);
     });
 }
 
@@ -75,7 +85,6 @@ function bfs(map, start, end) {
     const queue = [start];
     const cameFrom = {};
     const visited = new Set();
-
     visited.add(`${start.row},${start.col}`);
 
     while (queue.length > 0) {
@@ -99,23 +108,28 @@ function bfs(map, start, end) {
             }
         }
     }
-    return null; 
+    return null;
 }
 
 function getNeighbors(cell, map) {
     const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    const neighbors = [];
+    return directions.map(([dx, dy]) => ({
+        row: cell.row + dx,
+        col: cell.col + dy
+    })).filter(({ row, col }) => row >= 0 && col >= 0 && row < map.length && col < map[0].length && !map[row][col].classList.contains('wall'));
+}
 
-    directions.forEach(([dx, dy]) => {
-        const newRow = cell.row + dx;
-        const newCol = cell.col + dy;
+function generateMaze() {
+    if (!start || !end) {
+        alert("Сначала установите начальную и конечную точки!");
+        return;
+    }
 
-        if (newRow >= 0 && newCol >= 0 && newRow < map.length && newCol < map[0].length && !map[newRow][newCol].classList.contains('wall')) {
-            neighbors.push({ row: newRow, col: newCol });
+    map.forEach(row => row.forEach(cell => {
+        if (!cell.classList.contains('start') && !cell.classList.contains('end')) {
+            cell.classList.toggle('wall', Math.random() > 0.7);
         }
-    });
-
-    return neighbors;
+    }));
 }
 
 function clearMap() {
@@ -123,4 +137,9 @@ function clearMap() {
     start = null;
     end = null;
     map = [];
+}
+
+function toggleInstruction() {
+    const instructionBox = document.getElementById('instruction-box');
+    instructionBox.style.display = instructionBox.style.display === 'none' || instructionBox.style.display === '' ? 'block' : 'none';
 }

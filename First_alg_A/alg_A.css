@@ -1,41 +1,85 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     text-align: center;
-    background-color: #f4f4f4;
-    padding: 20px; 
+    background-color: #1e1e2e;
+    color: #ffffff;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
 }
 
 .controls {
-    margin-bottom: 50px;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 5px;
+    color: white;
+    transition: 0.3s;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+#generate-maze {
+    background-color: #9b59b6;
+}
+
+#generate-map {
+    background-color: #3498db;
+}
+
+#start-pathfinding {
+    background-color: #2ecc71;
+}
+
+.clear {
+    background-color: #e74c3c;
+}
+
+.instruction {
+    background-color: #f1c40f;
+    color: black;
 }
 
 #map {
     display: grid;
-    margin: 0 auto;
+    margin: 20px auto;
+    gap: 2px;
 }
 
 .cell {
-    width: 30px;
-    height: 30px;
-    border: 2px solid #b48282;
+    width: 40px;
+    height: 40px;
+    background-color: #ecf0f1;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.01s ease-in-out;
+    transition: background 0.2s ease-in-out;
 }
 
 .cell.start {
-    background-color: green;
+    background-color: #2ecc71;
 }
 
 .cell.end {
-    background-color: red;
+    background-color: #e74c3c;
 }
 
 .cell.wall {
-    background-color: black;
+    background-color: #34495e;
 }
 
 .cell.path {
-    background-color: blue;
+    background-color: #f39c12;
     animation: fadeIn 0.3s ease-in-out;
 }
 
@@ -44,28 +88,28 @@ body {
         background-color: white;
     }
     to {
-        background-color: blue;
+        background-color: #f39c12;
     }
 }
 
-button {
-    padding: 10px 20px;
-    background-color: #3ebcc5;
+#instruction-box {
+    display: none;
+    background-color: #2c3e50;
     color: white;
-    border: none;
-    cursor: pointer;
+    padding: 10px;
     border-radius: 5px;
-    margin: 5px;
+    margin-top: 10px;
+    text-align: left;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }
 
-button:hover {
-    background-color: #100977;
+#instruction-box p {
+    margin: 5px 0;
 }
 
-button.clear {
-    background-color: #c04b57;
-}
-
-button.clear:hover {
-    background-color: #99101e;
+.hidden {
+    display: none;
 }
