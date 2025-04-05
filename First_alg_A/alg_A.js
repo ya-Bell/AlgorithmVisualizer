@@ -65,13 +65,15 @@ function startPathfinding() {
 
     const { visitedOrder, cameFrom } = bfs(map, start, end);
 
+    const endKey = `${end.row},${end.col}`;
+    if (!cameFrom[endKey]) {
+        alert("Путь не найден!");
+        return;
+    }
+
     animateExploration(visitedOrder, () => {
         const path = reconstructPath(cameFrom, end);
-        if (path.length === 0) {
-            alert("Путь не найден!");
-        } else {
-            animatePath(path);
-        }
+        animatePath(path);
     });
 }
 
