@@ -63,21 +63,15 @@ function handleCellClick(cell, row, col) {
 function startPathfinding() {
     if (!start || !end) return alert("Не установлены начальная и конечная точки!");
 
-    const path = bfs(map, start, end);
-    if (path) {
-        animatePath(path);
-    } else {
-        alert("Путь не найден!");
-    }
-}
+    const { visitedOrder, cameFrom } = bfs(map, start, end);
 
-function animatePath(path) {
-    path.forEach(([row, col], index) => {
-        setTimeout(() => {
-            if (!(row === start.row && col === start.col) && !(row === end.row && col === end.col)) {
-                map[row][col].classList.add('path');
-            }
-        }, index * 50);
+    animateExploration(visitedOrder, () => {
+        const path = reconstructPath(cameFrom, end);
+        if (path.length === 0) {
+            alert("Путь не найден!");
+        } else {
+            animatePath(path);
+        }
     });
 }
 
@@ -85,30 +79,29 @@ function bfs(map, start, end) {
     const queue = [start];
     const cameFrom = {};
     const visited = new Set();
+    const visitedOrder = [];
+
     visited.add(`${start.row},${start.col}`);
 
     while (queue.length > 0) {
-        const current = queue.shift(); 
+        const current = queue.shift();
+        visitedOrder.push(current);
 
         if (current.row === end.row && current.col === end.col) {
-            const path = [];
-            let temp = current;
-            while (cameFrom[`${temp.row},${temp.col}`]) {
-                path.push([temp.row, temp.col]);
-                temp = cameFrom[`${temp.row},${temp.col}`];
-            }
-            return path.reverse();
+            break;
         }
 
         for (let neighbor of getNeighbors(current, map)) {
-            if (!visited.has(`${neighbor.row},${neighbor.col}`)) {
+            const key = `${neighbor.row},${neighbor.col}`;
+            if (!visited.has(key)) {
+                visited.add(key);
                 queue.push(neighbor);
-                visited.add(`${neighbor.row},${neighbor.col}`);
-                cameFrom[`${neighbor.row},${neighbor.col}`] = current;
+                cameFrom[key] = current;
             }
         }
     }
-    return null;
+
+    return { visitedOrder, cameFrom };
 }
 
 function getNeighbors(cell, map) {
@@ -116,7 +109,48 @@ function getNeighbors(cell, map) {
     return directions.map(([dx, dy]) => ({
         row: cell.row + dx,
         col: cell.col + dy
-    })).filter(({ row, col }) => row >= 0 && col >= 0 && row < map.length && col < map[0].length && !map[row][col].classList.contains('wall'));
+    })).filter(({ row, col }) =>
+        row >= 0 && col >= 0 &&
+        row < map.length &&
+        col < map[0].length &&
+        !map[row][col].classList.contains('wall')
+    );
+}
+
+function reconstructPath(cameFrom, end) {
+    const path = [];
+    let current = end;
+    while (cameFrom[`${current.row},${current.col}`]) {
+        path.push([current.row, current.col]);
+        current = cameFrom[`${current.row},${current.col}`];
+    }
+    path.push([current.row, current.col]);
+    return path.reverse();
+}
+
+function animateExploration(visitedOrder, onComplete) {
+    visitedOrder.forEach((cell, index) => {
+        setTimeout(() => {
+            const element = map[cell.row][cell.col];
+            if (!element.classList.contains('start') && !element.classList.contains('end')) {
+                element.classList.add('visited');
+            }
+            if (index === visitedOrder.length - 1) {
+                setTimeout(onComplete, 200);
+            }
+        }, index * 30);
+    });
+}
+
+function animatePath(path) {
+    path.forEach(([row, col], index) => {
+        setTimeout(() => {
+            const cell = map[row][col];
+            if (!cell.classList.contains('start') && !cell.classList.contains('end')) {
+                cell.classList.add('path');
+            }
+        }, index * 50);
+    });
 }
 
 function generateMaze() {

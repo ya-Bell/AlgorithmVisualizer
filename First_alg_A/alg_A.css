@@ -78,6 +78,11 @@ button:hover {
     background-color: #34495e;
 }
 
+.cell.visited {
+    background-color: #3498db;
+    animation: visitedFadeIn 0.2s ease-in-out;
+}
+
 .cell.path {
     background-color: #f39c12;
     animation: fadeIn 0.3s ease-in-out;
@@ -89,6 +94,15 @@ button:hover {
     }
     to {
         background-color: #f39c12;
+    }
+}
+
+@keyframes visitedFadeIn {
+    from {
+        background-color: #ecf0f1;
+    }
+    to {
+        background-color: #3498db;
     }
 }
 
