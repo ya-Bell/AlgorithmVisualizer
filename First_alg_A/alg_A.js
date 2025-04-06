@@ -63,7 +63,7 @@ function handleCellClick(cell, row, col) {
 function startPathfinding() {
     if (!start || !end) return alert("Не установлены начальная и конечная точки!");
 
-    const { visitedOrder, cameFrom } = bfs(map, start, end);
+    const { visitedOrder, cameFrom } = aStar(map, start, end);
 
     const endKey = `${end.row},${end.col}`;
     if (!cameFrom[endKey]) {
@@ -77,16 +77,23 @@ function startPathfinding() {
     });
 }
 
-function bfs(map, start, end) {
-    const queue = [start];
+function aStar(map, start, end) {
+    const openSet = [start];
     const cameFrom = {};
-    const visited = new Set();
+    const gScore = {};
+    const fScore = {};
     const visitedOrder = [];
 
-    visited.add(`${start.row},${start.col}`);
+    const key = (cell) => `${cell.row},${cell.col}`;
+    const heuristic = (a, b) => Math.abs(a.row - b.row) + Math.abs(a.col - b.col); // Манхэттенская эвристика
 
-    while (queue.length > 0) {
-        const current = queue.shift();
+    gScore[key(start)] = 0;
+    fScore[key(start)] = heuristic(start, end);
+
+    while (openSet.length > 0) {
+        openSet.sort((a, b) => fScore[key(a)] - fScore[key(b)]);
+        const current = openSet.shift();
+
         visitedOrder.push(current);
 
         if (current.row === end.row && current.col === end.col) {
@@ -94,11 +101,17 @@ function bfs(map, start, end) {
         }
 
         for (let neighbor of getNeighbors(current, map)) {
-            const key = `${neighbor.row},${neighbor.col}`;
-            if (!visited.has(key)) {
-                visited.add(key);
-                queue.push(neighbor);
-                cameFrom[key] = current;
+            const nKey = key(neighbor);
+            const tentativeG = gScore[key(current)] + 1;
+
+            if (tentativeG < (gScore[nKey] ?? Infinity)) {
+                cameFrom[nKey] = current;
+                gScore[nKey] = tentativeG;
+                fScore[nKey] = tentativeG + heuristic(neighbor, end);
+
+                if (!openSet.find(c => key(c) === nKey)) {
+                    openSet.push(neighbor);
+                }
             }
         }
     }
