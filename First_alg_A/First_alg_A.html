@@ -17,7 +17,18 @@
         <button id="clear-map" class="clear">Очистить</button>
         <button id="toggle-instruction" class="instruction">Инструкция</button>
     </div>
-    
+    <div class="bottom-bar">
+        <button class="main-menu-button" onclick="document.location='Web_6_module/Main-site/index.html'">Главное меню</button>
+        <div class="algo-buttons">
+          <button class="algo-button current">A*</button>
+          <button class="algo-button" onclick="location.href='clustering.html'">Кластеризация</button>
+          <button class="algo-button" onclick="location.href='genetic.html'">Генетический алгоритм</button>
+          <button class="algo-button" onclick="location.href='ant.html'">Муравьиный алгоритм</button>
+          <button class="algo-button" onclick="location.href='tree.html'">Дерево решений</button>
+          <button class="algo-button" onclick="location.href='nn.html'">Нейронная сеть</button>
+        </div>
+      </div>
+      
     <div id="instruction-box" class="hidden">
         <p>1️⃣ Нажмите "Создать карту", чтобы задать размер.</p>
         <p>2️⃣ Кликните на клетку, чтобы выбрать старт и финиш.</p>
