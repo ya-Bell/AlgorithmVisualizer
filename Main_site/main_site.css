@@ -4,10 +4,10 @@ body {
 
 /* Header & logo */
 .page-header {
-  background-color: #ffffffbe;
+  background-color: #f3eaea49;
   padding: 10px 32px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  border-radius: 12px;
+  border-radius: 18px;
 }
 
 .page-header .container {
@@ -16,10 +16,11 @@ body {
 }
 
 .logo {
+  font-family: Arial, Helvetica, sans-serif;
   display: flex;
   align-items: center;
   font-weight: bold;
-  font-size: 1.5em;
+  font-size: 1.3em;
   color: #111e3b;
 }
 
@@ -28,6 +29,7 @@ body {
   height: 30px;
   margin-right: 8px;
 }
+
 /* Title */
 .page-title {
   text-align: center;
@@ -55,7 +57,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  padding: 40px 20px;
+  padding: 10px 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -86,17 +88,73 @@ body {
 }
 
 .algo-card h3 {
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-weight: bold;
   font-size: 22px;
   margin-bottom: 8px;
   color: #1a1a1a;
 }
 
 .algo-card p {
-  font-size: 18px;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 15.6px;
   color: #555;
-  line-height: 1.5;
+  line-height: 1.7;
+  border : 0.5px solid #c5c1c149;
+  padding: 18px 20px;
+  border-radius: 10px;
 }
 .link{
   text-decoration: none;
 }
 /* Footer */
+.footer {
+  margin-top: 10px;
+  background-color: #c5c1c149;
+  padding: 0px 1px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 18px;
+}
+
+.authors {
+  display: flex;
+  justify-content: center;
+  gap: 75px;
+}
+
+.author {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.circle {
+  background-size: cover;
+  background-position: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 60%;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+#user_one_photo {
+  background-image: url('png/user_one.png');
+}
+#user_two_photo {
+  background-image: url('png/user_two.png');
+}
+.name {
+  font-size: 17px;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+.role {
+  font-size: 14px;
+  color: #696262;
+  margin-top: 4px;
+  margin-bottom: 0px;
+}
