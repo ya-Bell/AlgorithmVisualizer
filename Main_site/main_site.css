@@ -66,12 +66,12 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     padding: 20px;
     text-align: center;
-    transition: transform 0.3s ease box-shadow 0.3s ease;
   }
   
   .algo-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    transition: transform 0.5s ease;
   }
   
   .algo-card img {
@@ -79,7 +79,7 @@ body {
     height: 140px;
     object-fit: contain;
     margin-bottom: 12px;
-    transition: transform 0.4s ease;
+    transition: transform 0.5s ease;
   }
   .algo-card:hover img {
     transform: scale(1.1);
@@ -95,6 +95,9 @@ body {
     font-size: 18px;
     color: #555;
     line-height: 1.5;
+  }
+  .link{
+    text-decoration: none;
   }
   /* Footer */
   
