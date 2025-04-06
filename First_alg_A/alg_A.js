@@ -85,7 +85,7 @@ function aStar(map, start, end) {
     const visitedOrder = [];
 
     const key = (cell) => `${cell.row},${cell.col}`;
-    const heuristic = (a, b) => Math.abs(a.row - b.row) + Math.abs(a.col - b.col); // Манхэттенская эвристика
+    const heuristic = (a, b) => Math.abs(a.row - b.row) + Math.abs(a.col - b.col);
 
     gScore[key(start)] = 0;
     fScore[key(start)] = heuristic(start, end);
@@ -120,18 +120,37 @@ function aStar(map, start, end) {
 }
 
 function getNeighbors(cell, map) {
-    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    return directions.map(([dx, dy]) => ({
-        row: cell.row + dx,
-        col: cell.col + dy
-    })).filter(({ row, col }) =>
-        row >= 0 && col >= 0 &&
-        row < map.length &&
-        col < map[0].length &&
-        !map[row][col].classList.contains('wall')
-    );
-}
+    const directions = [
+        [-1, 0], [1, 0], [0, -1], [0, 1],
+        [-1, -1], [-1, 1], [1, -1], [1, 1] 
+    ];
+    
+    const neighbors = [];
 
+    for (let [dx, dy] of directions) {
+        const newRow = cell.row + dx;
+        const newCol = cell.col + dy;
+
+        if (
+            newRow >= 0 && newRow < map.length &&
+            newCol >= 0 && newCol < map[0].length &&
+            !map[newRow][newCol].classList.contains('wall')
+        ) {
+            if (Math.abs(dx) === 1 && Math.abs(dy) === 1) {
+                const cell1 = map[cell.row + dx][cell.col];
+                const cell2 = map[cell.row][cell.col + dy];
+
+                if (cell1.classList.contains('wall') || cell2.classList.contains('wall')) {
+                    continue;
+                }
+            }
+
+            neighbors.push({ row: newRow, col: newCol });
+        }
+    }
+
+    return neighbors;
+}
 function reconstructPath(cameFrom, end) {
     const path = [];
     let current = end;
