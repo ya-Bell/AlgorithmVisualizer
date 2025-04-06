@@ -5,7 +5,6 @@ canvas.height = 500;
 
 let points = [];
 let clusters = [];
-let iterations = 0;
 
 const metricSelect = document.getElementById("metric");
 
@@ -30,8 +29,6 @@ document.getElementById("start").addEventListener("click", () => {
 document.getElementById("clear").addEventListener("click", () => {
     points = [];
     clusters = [];
-    iterations = 0;
-    document.getElementById("iterations").innerText = "Итерации: 0";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
@@ -172,26 +169,23 @@ function drawMetricLabels() {
 
 function kMeansClustering(k, metric = "euclidean", silent = false) {
     initializeClusters(k);
-    iterations = 0;
     let changed = true;
 
     while (changed) {
-        const prev = JSON.stringify(points.map(p => p.cluster));
+        const prev = JSON.stringify(points.map(p => p.cluster)); 
         assignPointsToClusters(metric);
-        updateClusterCenters();
-        const curr = JSON.stringify(points.map(p => p.cluster));
-        changed = prev !== curr;
-        iterations++;
+        updateClusterCenters(); 
+        const curr = JSON.stringify(points.map(p => p.cluster)); 
+        changed = prev !== curr; 
+
         if (!silent) {
-            document.getElementById("iterations").innerText = "Итерации: " + iterations;
-            drawPoints();
+            drawPoints(); 
             drawMetricLabels();
         }
     }
 
     if (!silent) {
-        document.getElementById("iterations").innerText = "Итерации: " + iterations;
-        drawPoints();
+        drawPoints(); 
         drawMetricLabels();
     }
 }

@@ -42,11 +42,6 @@ button:hover {
     background-color: #0056b3;
 }
 
-#iterations {
-    font-weight: bold;
-    font-size: 16px;
-}
-
 #canvas-container {
     display: flex;
     justify-content: center;
@@ -58,7 +53,6 @@ canvas {
     border: 2px solid #555;
     cursor: crosshair;
 }
-
 
 /* Инструкция */
 .instruction {
@@ -77,4 +71,3 @@ canvas {
     margin-top: 0;
     color: #004080;
 }
-
