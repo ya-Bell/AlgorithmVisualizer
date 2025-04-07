@@ -121,8 +121,7 @@ function aStar(map, start, end) {
 
 function getNeighbors(cell, map) {
     const directions = [
-        [-1, 0], [1, 0], [0, -1], [0, 1],
-        [-1, -1], [-1, 1], [1, -1], [1, 1] 
+        [-1, 0], [1, 0], [0, -1], [0, 1]
     ];
     
     const neighbors = [];
@@ -136,21 +135,14 @@ function getNeighbors(cell, map) {
             newCol >= 0 && newCol < map[0].length &&
             !map[newRow][newCol].classList.contains('wall')
         ) {
-            if (Math.abs(dx) === 1 && Math.abs(dy) === 1) {
-                const cell1 = map[cell.row + dx][cell.col];
-                const cell2 = map[cell.row][cell.col + dy];
-
-                if (cell1.classList.contains('wall') || cell2.classList.contains('wall')) {
-                    continue;
-                }
-            }
-
             neighbors.push({ row: newRow, col: newCol });
         }
     }
 
     return neighbors;
 }
+
+
 function reconstructPath(cameFrom, end) {
     const path = [];
     let current = end;
