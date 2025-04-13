@@ -11,10 +11,26 @@ const multiRunButton = document.getElementById("multiRunBtn");
 const statusLabel = document.getElementById("statusLabel");
 const coordinatesLabel = document.getElementById("coordinates");
 
+const toggleDistancesBtn = document.getElementById("toggleDistancesBtn");
+
+
 let pointList = [];
 let isRunning = false;
 let hasRunAtLeastOnce = false;
+let showDistances = true;
+let lastBestPath = null;
 
+
+function getClickedPointIndex(x, y, points, radius = 7) {
+  for (let i = 0; i < points.length; i++) {
+    const dx = x - points[i].x;
+    const dy = y - points[i].y;
+    if (dx * dx + dy * dy <= radius * radius) {
+      return i;
+    }
+  }
+  return -1;
+}
 // сообщение перед загрузкой
 window.addEventListener("load", () => {
   drawIntroMessage();
@@ -32,9 +48,18 @@ canvasMap.addEventListener("click", (event) => {
   const canvasRect = canvasMap.getBoundingClientRect();
   const xCoord = event.clientX - canvasRect.left;
   const yCoord = event.clientY - canvasRect.top;
-  pointList.push({ x: xCoord, y: yCoord });
+
+  const clickedIndex = getClickedPointIndex(xCoord, yCoord, pointList);
+  
+  if (clickedIndex !== -1) {
+    pointList.splice(clickedIndex, 1);
+  } else {
+    pointList.push({ x: xCoord, y: yCoord });
+  }
+
   renderPoints();
 });
+
 
 // Отрисовка точек и линий
 function renderPoints(pathSequence = null) {
@@ -59,30 +84,33 @@ function renderPoints(pathSequence = null) {
     canvasMapContext.stroke();
 
     // Длина линии
-    for (let i = 1; i < pathSequence.length; i++) {
-      const startPoint = pointList[pathSequence[i - 1]];
-      const endPoint = pointList[pathSequence[i]];
-      const distance = calculateDistance(startPoint, endPoint);
-
-      const midX = (startPoint.x + endPoint.x) / 2;
-      const midY = (startPoint.y + endPoint.y) / 2;
-
+    if (showDistances) {
+      for (let i = 1; i < pathSequence.length; i++) {
+        const startPoint = pointList[pathSequence[i - 1]];
+        const endPoint = pointList[pathSequence[i]];
+        const distance = calculateDistance(startPoint, endPoint);
+    
+        const midX = (startPoint.x + endPoint.x) / 2;
+        const midY = (startPoint.y + endPoint.y) / 2;
+    
+        canvasMapContext.fillStyle = "white";
+        canvasMapContext.fillRect(midX - 5, midY - 10, 45, 14);
+    
+        canvasMapContext.fillStyle = "black";
+        canvasMapContext.fillText(distance.toFixed(2), midX, midY);
+      }
+    
+      const distance = calculateDistance(lastPoint, firstPoint);
+      const midX = (lastPoint.x + firstPoint.x) / 2;
+      const midY = (lastPoint.y + firstPoint.y) / 2;
+    
       canvasMapContext.fillStyle = "white";
       canvasMapContext.fillRect(midX - 5, midY - 10, 45, 14);
-
+    
       canvasMapContext.fillStyle = "black";
       canvasMapContext.fillText(distance.toFixed(2), midX, midY);
     }
-
-    const distance = calculateDistance(lastPoint, firstPoint);
-    const midX = (lastPoint.x + firstPoint.x) / 2;
-    const midY = (lastPoint.y + firstPoint.y) / 2;
-
-    canvasMapContext.fillStyle = "white";
-    canvasMapContext.fillRect(midX - 5, midY - 10, 45, 14);
-
-    canvasMapContext.fillStyle = "black";
-    canvasMapContext.fillText(distance.toFixed(2), midX, midY);
+    
   }
 
   pointList.forEach((point, index) => {
@@ -147,7 +175,8 @@ multiRunButton.addEventListener("click", async () => {
     current.distance < best.distance ? current : best
   );
 
-  renderPoints(bestResult.path);
+  renderPoints(bestResult.path)
+  lastBestPath = bestResult.path;
   statusLabel.textContent = `Лучший путь: ${bestResult.distance.toFixed(2)}`;
   renderComparisonPlot(resultList);
   isRunning = false;
@@ -160,6 +189,7 @@ function toggleUIBlocking(state) {
   multiRunButton.disabled = state;
   clearButton.disabled = state;
   isRunning = state;
+  toggleDistancesBtn.disabled = state;
 }
 
 function runGeneticAlgorithm() {
@@ -168,6 +198,7 @@ function runGeneticAlgorithm() {
 
 // сам генетический алгоритм
 function runGeneticAlgorithmOnce(returnResult = false) {
+  
   return new Promise((resolve) => {
     const POPULATION_SIZE = 100;
     const MAX_GENERATIONS = 100;
@@ -256,6 +287,7 @@ function runGeneticAlgorithmOnce(returnResult = false) {
         renderPoints(bestPath);
 
         if (returnResult) {
+          lastBestPath = bestPath;
           resolve({
             path: bestPath,
             distance: bestDistance,
@@ -336,4 +368,15 @@ canvasMap.addEventListener("mousemove", (event) => {
 
 canvasMap.addEventListener("mouseleave", () => {
   coordinatesLabel.style.display = "none";
+});
+
+toggleDistancesBtn.addEventListener("click", () => {
+  showDistances = !showDistances;
+  toggleDistancesBtn.textContent = showDistances ? "Скрыть длины" : "Показать длины";
+
+  if (hasRunAtLeastOnce && lastBestPath) {
+    renderPoints(lastBestPath);
+  } else {
+    renderPoints();
+  }
 });

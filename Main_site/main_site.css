@@ -1,5 +1,5 @@
 body {
-  background: linear-gradient(to bottom right, #f0f4f8, #ffffff);
+  background: linear-gradient(to bottom right, #dff1ff, #8ec5fc);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
@@ -31,6 +31,11 @@ body {
   width: 30px;
   height: 30px;
   margin-right: 8px;
+}
+
+.container-header {
+  max-width: 1000px;
+  padding: 0 20px;
 }
 
 /* Title */
@@ -113,8 +118,8 @@ body {
 /* Footer */
 .footer {
   margin-top: 10px;
-  background-color: #c5c1c149;
-  padding: 0px 1px;
+  background-color: #0313411e;
+  padding: 3px 2px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   border-radius: 18px;
 }
@@ -160,4 +165,14 @@ body {
   color: #696262;
   margin-top: 4px;
   margin-bottom: 0px;
+}
+.footer-footer {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-top: 20px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  opacity: 0.4;
 }

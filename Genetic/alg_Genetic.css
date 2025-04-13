@@ -196,3 +196,14 @@ button:disabled {
 .algo-button.current {
   background-color: crimson;
 }
+
+.footer {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-top: 20px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  opacity: 0.4;
+}
