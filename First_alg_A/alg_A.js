@@ -19,7 +19,13 @@ document.getElementById('size').addEventListener('input', function () {
 
 function generateMap() {
     const size = +document.getElementById('size').value;
+
+    // Сброс данных
     map = [];
+    start = null;
+    end = null;
+    isDrawingWalls = false;
+
     const container = document.getElementById('map');
     container.innerHTML = '';
     container.style.gridTemplateColumns = `repeat(${size}, 40px)`;
@@ -32,10 +38,14 @@ function generateMap() {
             cell.classList.add('cell');
             cell.dataset.row = row;
             cell.dataset.col = col;
+
             cell.addEventListener('mousedown', () => handleCellClick(cell, row, col));
             cell.addEventListener('mouseover', () => {
-                if (isDrawingWalls) cell.classList.add('wall');
+                if (isDrawingWalls) {
+                    cell.classList.add('wall');
+                }
             });
+
             rowArray.push(cell);
             container.appendChild(cell);
         }
@@ -65,9 +75,23 @@ function handleCellClick(cell, row, col) {
 }
 
 function startPathfinding() {
-    if (!start || !end) return alert("Не установлены начальная и конечная точки!");
+    if (!start || !end) {
+        alert("Не установлены начальная и конечная точки!");
+        return;
+    }
+
+    const hasPathOrVisited = map.some(row =>
+        row.some(cell => cell.classList.contains('path') || cell.classList.contains('visited'))
+    );
+
+    if (hasPathOrVisited) {
+        alert("Сначала очистите карту перед запуском алгоритма!");
+        return;
+    }
+
     const { visitedOrder, cameFrom } = aStar(map, start, end);
     toggleUIBlocking(true);
+
     const endKey = `${end.row},${end.col}`;
     if (!cameFrom[endKey]) {
         alert("Путь не найден!");
@@ -179,6 +203,9 @@ function animatePath(path) {
             if (!cell.classList.contains('start') && !cell.classList.contains('end')) {
                 cell.classList.add('path');
             }
+            if (index === path.length - 1) {
+                toggleUIBlocking(false);
+            }
         }, index * 50);
     });
 }
@@ -189,6 +216,15 @@ function generateMaze() {
         return;
     }
 
+    const hasPathOrVisited = map.some(row =>
+        row.some(cell => cell.classList.contains('path') || cell.classList.contains('visited'))
+    );
+
+    if (hasPathOrVisited) {
+        alert("Сначала очистите карту перед генерацией лабиринта!");
+        return;
+    }
+    
     map.forEach(row => row.forEach(cell => {
         if (!cell.classList.contains('start') && !cell.classList.contains('end')) {
             cell.classList.toggle('wall', Math.random() > 0.7);
