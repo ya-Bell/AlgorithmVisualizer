@@ -22,9 +22,21 @@
     <div id="coordinates">X: 0, Y: 0</div>
 
     <div class="controls">
-      <button id="startButton"> Старт</button>
-      <button id="clearButton"> Очистить</button>
-      <button id="multiRunBtn"> 5 запусков</button>
+      <button id="startButton">▶ Старт</button>
+      <button id="clearButton">🗑 Очистить</button>
+      <button id="multiRunBtn">🔁 5 запусков</button>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="main-menu-button" onclick="document.location='../Main_site/index.html'">Главное меню</button>
+      <div class="algo-buttons">
+        <button class="algo-button" onclick="location.href='../First_alg_A/First_alg_A.html'">A*</button>
+        <button class="algo-button" onclick="location.href='../Clustering/cluster.html'">Кластеризация</button>
+        <button class="algo-button current">Генетический алгоритм</button>
+        <button class="algo-button" onclick="location.href='../Ant/Algorithm_ant.html'">Муравьиный алгоритм</button>
+        <button class="algo-button" onclick="location.href='tree.html'">Дерево решений</button>
+        <button class="algo-button" onclick="location.href='nn.html'">Нейронная сеть</button>
+      </div>
     </div>
 
     <div id="statusLabel">Готов к запуску</div>

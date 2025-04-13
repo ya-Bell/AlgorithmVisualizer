@@ -1,56 +1,52 @@
+/* Общий фон и шрифт */
 body {
-    font-family: 'Arial', sans-serif;
-    text-align: center;
-    background-color: #1e1e2e;
-    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(90deg, #dff1ff, #8ec5fc);
+    margin: 0;
     padding: 20px;
+    text-align: center;
+    color: #333;
 }
 
 h1 {
-    font-size: 28px;
-    margin-bottom: 10px;
+    font-size: 30px;
+    margin-bottom: 20px;
+    color: #004080;
 }
 
+/* Стили для панели управления */
 .controls {
     margin-bottom: 20px;
 }
 
-button {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
+.controls label {
+    margin-right: 10px;
+}
+
+/* Унифицированный стиль для всех input, select, button */
+.controls input,
+.controls select,
+.controls button {
     margin: 5px;
+    font-size: 16px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid #aaa;
+}
+
+/* Стиль кнопок */
+button {
+    background-color: #007bff;
     color: white;
+    cursor: pointer;
     transition: 0.3s;
 }
 
 button:hover {
-    opacity: 0.8;
+    background-color: #0056b3;
 }
 
-#generate-maze {
-    background-color: #9b59b6;
-}
-
-#generate-map {
-    background-color: #3498db;
-}
-
-#start-pathfinding {
-    background-color: #2ecc71;
-}
-
-.clear {
-    background-color: #e74c3c;
-}
-
-.instruction {
-    background-color: #f1c40f;
-    color: black;
-}
-
+/* Карта и ячейки */
 #map {
     display: grid;
     margin: 20px auto;
@@ -64,6 +60,7 @@ button:hover {
     border-radius: 5px;
     cursor: pointer;
     transition: background 0.2s ease-in-out;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
 .cell.start {
@@ -106,18 +103,18 @@ button:hover {
     }
 }
 
+/* Инструкция */
 #instruction-box {
     display: none;
-    background-color: #2c3e50;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
+    background-color: #eef7ff;
+    border: 1px solid #a2c4f3;
+    border-radius: 8px;
+    padding: 15px;
+    max-width: 700px;
+    margin: 10px auto;
     text-align: left;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    font-size: 15px;
+    color: #333;
 }
 
 #instruction-box p {
@@ -127,6 +124,8 @@ button:hover {
 .hidden {
     display: none;
 }
+
+/* Нижняя панель */
 .bottom-bar {
     position: fixed;
     bottom: 10px;
@@ -138,9 +137,9 @@ button:hover {
     padding: 10px 20px;
     box-sizing: border-box;
     z-index: 1000;
-  }
-  
-  .main-menu-button {
+}
+
+.main-menu-button {
     padding: 10px 20px;
     font-size: 16px;
     background-color: #333;
@@ -149,19 +148,19 @@ button:hover {
     border-radius: 12px;
     cursor: pointer;
     transition: background 0.2s ease;
-  }
-  
-  .main-menu-button:hover {
+}
+
+.main-menu-button:hover {
     background-color: #555;
-  }
-  
-  .algo-buttons {
+}
+
+.algo-buttons {
     display: grid;
     grid-template-columns: repeat(2, auto);
     grid-gap: 10px;
-  }
-  
-  .algo-button {
+}
+
+.algo-button {
     padding: 10px 15px;
     font-size: 14px;
     background-color: black;
@@ -170,12 +169,12 @@ button:hover {
     border-radius: 12px;
     cursor: pointer;
     transition: background 0.2s ease;
-  }
-  
-  .algo-button:hover {
+}
+
+.algo-button:hover {
     background-color: #444;
-  }
-  
-  .algo-button.current {
+}
+
+.algo-button.current {
     background-color: crimson;
-  }
+}

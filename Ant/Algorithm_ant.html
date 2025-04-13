@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Муравьиный Алгоритм</title>
+  <link rel="stylesheet" href="ant_alg.css">
+  <link rel="icon" href="../icon/icon.png" type="image/png">
+</head>
+<body>
+  <div class="container">
+    <h1>Муравьиный Алгоритм</h1>
+
+    <div class="controls">
+      <button id="startButton">Запустить алгоритм</button>
+      <button id="animatePathButton">Показать анимацию</button>
+      <button id="clearButton">Очистить</button>
+      <button id="resetPheromonesButton">Сбросить феромоны</button>
+      <label for="autoRun">Автоматически запускать при добавлении точек</label>
+      <input type="checkbox" id="autoRun" checked>
+    </div>
+    <div class="bottom-bar">
+      <button class="main-menu-button" onclick="document.location='../Main_site/index.html'">Главное меню</button>
+      <div class="algo-buttons">
+        <button class="algo-button" onclick="location.href='../First_alg_A/First_alg_A.html'">A*</button>
+        <button class="algo-button" onclick="location.href='../Clustering/cluster.html'">Кластеризация</button>
+        <button class="algo-button" onclick="location.href='../Genetic/Genetic_alg.html'">Генетический алгоритм</button>
+        <button class="algo-button current">Муравьиный алгоритм</button>
+        <button class="algo-button" onclick="location.href='tree.html'">Дерево решений</button>
+        <button class="algo-button" onclick="location.href='nn.html'">Нейронная сеть</button>
+      </div>
+    </div>
+
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <div id="pathLengthDisplay"></div>
+  </div>
+
+  <script src="ant_alg.js"></script>
+</body>
