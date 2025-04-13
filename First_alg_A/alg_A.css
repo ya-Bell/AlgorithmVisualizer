@@ -1,14 +1,14 @@
-/* Общий фон и шрифт */
 body {
     font-family: 'Segoe UI', sans-serif;
     background: linear-gradient(90deg, #dff1ff, #8ec5fc);
     margin: 0;
-    padding: 20px;
+    padding: 0;
     text-align: center;
     color: #333;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Снимаем ограничение на высоту */
+    overflow-y: auto; /* Добавляем вертикальную прокрутку */
 }
 
 h1 {
@@ -17,7 +17,6 @@ h1 {
     color: #004080;
 }
 
-/* Стили для панели управления */
 .controls {
     margin-bottom: 20px;
 }
@@ -26,7 +25,6 @@ h1 {
     margin-right: 10px;
 }
 
-/* Унифицированный стиль для всех input, select, button */
 .controls input,
 .controls select,
 .controls button {
@@ -37,7 +35,6 @@ h1 {
     border: 1px solid #aaa;
 }
 
-/* Стиль кнопок */
 button {
     background-color: #007bff;
     color: white;
@@ -49,16 +46,33 @@ button:hover {
     background-color: #0056b3;
 }
 
-/* Карта и ячейки */
+/* Контейнер для карты */
+#map-container {
+    display: flex;
+    flex-grow: 1; /* Заполняет доступное пространство */
+    flex-direction: column;
+    justify-content: flex-start; /* Вертикальное выравнивание сверху */
+    padding: 10px;
+    overflow: hidden;
+    height: 400px; /* Ограничиваем высоту карты, чтобы она была видимой, и была прокрутка */
+    max-height: calc(100vh - 160px); /* Ограничение по высоте, оставляем место для кнопок */
+}
+
 #map {
     display: grid;
-    margin: 20px auto;
-    gap: 2px;
+    gap: 1px; /* Уменьшаем зазор между клеточками */
+    width: 100%;
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); /* Клетки будут уменьшаться */
+    grid-template-rows: repeat(auto-fill, minmax(30px, 1fr)); /* Клетки будут уменьшаться */
+    justify-content: center; /* Центрируем по горизонтали */
+    max-height: 100%; /* Запрещаем выход за пределы контейнера */
+    overflow: auto; /* Добавляем прокрутку */
+    margin-bottom: 10px; /* Отступ снизу, чтобы не перекрывалась нижней панелью */
 }
 
 .cell {
-    width: 40px;
-    height: 40px;
+    width: 100%; /* Клетка займет всю доступную ширину */
+    height: 100%; /* Клетка займет всю доступную высоту */
     background-color: #ecf0f1;
     border-radius: 5px;
     cursor: pointer;
@@ -89,24 +103,15 @@ button:hover {
 }
 
 @keyframes fadeIn {
-    from {
-        background-color: white;
-    }
-    to {
-        background-color: #f39c12;
-    }
+    from { background-color: white; }
+    to { background-color: #f39c12; }
 }
 
 @keyframes visitedFadeIn {
-    from {
-        background-color: #ecf0f1;
-    }
-    to {
-        background-color: #3498db;
-    }
+    from { background-color: #ecf0f1; }
+    to { background-color: #3498db; }
 }
 
-/* Инструкция */
 #instruction-box {
     display: none;
     background-color: #eef7ff;
@@ -128,18 +133,18 @@ button:hover {
     display: none;
 }
 
-/* Нижняя панель */
+/* Нижняя панель с кнопками */
 .bottom-bar {
     position: fixed;
-    bottom: 10px;
-    left: 0;
+    bottom: 0;
     width: 100%;
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     padding: 10px 20px;
     box-sizing: border-box;
     z-index: 1000;
+    background-color: transparent;
 }
 
 .main-menu-button {
@@ -185,4 +190,4 @@ button:hover {
 button:disabled {
     background-color: #999;
     cursor: not-allowed;
-  }
+}
