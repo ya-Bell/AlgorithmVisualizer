@@ -83,30 +83,30 @@ button:hover {
 /* Контейнер для карты */
 #map-container {
     display: flex;
-    flex-grow: 1; /* Заполняет доступное пространство */
+    flex-grow: 1;
     flex-direction: column;
-    justify-content: flex-start; /* Вертикальное выравнивание сверху */
+    justify-content: flex-start;
     padding: 10px;
     overflow: hidden;
-    height: 400px; /* Ограничиваем высоту карты, чтобы она была видимой, и была прокрутка */
-    max-height: calc(100vh - 160px); /* Ограничение по высоте, оставляем место для кнопок */
+    height: 400px;
+    max-height: calc(100vh - 160px);
 }
 
 #map {
     display: grid;
-    gap: 1px; /* Уменьшаем зазор между клеточками */
+    gap: 1px;
     width: 100%;
-    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); /* Клетки будут уменьшаться */
-    grid-template-rows: repeat(auto-fill, minmax(30px, 1fr)); /* Клетки будут уменьшаться */
-    justify-content: center; /* Центрируем по горизонтали */
-    max-height: 100%; /* Запрещаем выход за пределы контейнера */
-    overflow: auto; /* Добавляем прокрутку */
-    margin-bottom: 10px; /* Отступ снизу, чтобы не перекрывалась нижней панелью */
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+    grid-template-rows: repeat(auto-fill, minmax(30px, 1fr));
+    justify-content: center;
+    max-height: 100%;
+    overflow: auto;
+    margin-bottom: 10px;
 }
 
 .cell {
-    width: 100%; /* Клетка займет всю доступную ширину */
-    height: 100%; /* Клетка займет всю доступную высоту */
+    width: 100%;
+    height: 100%;
     background-color: #ecf0f1;
     border-radius: 5px;
     cursor: pointer;
@@ -167,7 +167,7 @@ button:hover {
     display: none;
 }
 
-/* Нижняя панель с кнопками */
+/* Нижняя панель с кнопочками */
 .bottom-bar {
     position: fixed;
     bottom: 10px;
