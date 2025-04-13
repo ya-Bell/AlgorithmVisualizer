@@ -24,8 +24,7 @@ function drawIntroMessage() {
   ctx.clearRect(0, 0, canvasPlot.width, canvasPlot.height);
   ctx.fillStyle = "#666";
   ctx.font = "16px Arial";
-  ctx.fillText("Здесь будет отображаться график", 20, 80);
-  ctx.fillText("результатов запусков ГА", 20, 105);
+  ctx.fillText("Здесь будет отображаться график", 20, 20);
 }
 // Появление точек на канвасе
 canvasMap.addEventListener("click", (event) => {
