@@ -5,6 +5,9 @@ body {
   padding: 20px;
   text-align: center;
   color: #333;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 h1 {

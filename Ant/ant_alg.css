@@ -1,10 +1,13 @@
 body {
   font-family: 'Segoe UI', 'Arial', sans-serif;
-  background-color: #f8f9fa;
+  background: linear-gradient(to bottom right, #dff1ff, #8ec5fc);
   color: #333;
   margin: 0;
   padding: 20px;
   text-align: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .container {

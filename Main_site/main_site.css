@@ -1,5 +1,8 @@
 body {
   background: linear-gradient(to bottom right, #f0f4f8, #ffffff);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 /* Header & logo */
