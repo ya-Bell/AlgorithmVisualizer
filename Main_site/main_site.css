@@ -46,7 +46,7 @@ body {
 }
 
 .page-title h2 {
-  color: #0a1f44;
+  color: #01182e;
   font-size: 20px;
   font-weight: 600;
   text-transform: uppercase;
@@ -55,7 +55,7 @@ body {
 }
 
 .page-title h1 {
-  color: #1a1a1a;
+  color: #01182e;
   font-size: 32px;
   font-weight: 700;
   margin-top: 0px;
@@ -175,4 +175,5 @@ body {
   bottom: 0;
   width: 100%;
   opacity: 0.4;
+  pointer-events: none;
 }

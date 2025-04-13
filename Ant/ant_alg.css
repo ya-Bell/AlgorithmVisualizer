@@ -43,7 +43,7 @@ body {
 h1 {
   font-size: 30px;
   margin-bottom: 20px;
-  color: #004080;
+  color: #01182e;
 }
 .container {
   max-width: 800px;
@@ -60,7 +60,7 @@ h1 {
 
 button, input[type="checkbox"] {
   padding: 10px 16px;
-  font-size: 14px;
+  font-size: 16px;
   border: none;
   border-radius: 6px;
   background-color: #007bff;
@@ -104,6 +104,10 @@ label {
   padding: 10px 20px;
   box-sizing: border-box;
   z-index: 1000;
+  pointer-events: none;
+}
+.bottom-bar button {
+    pointer-events: auto;
 }
 
 .main-menu-button {
@@ -155,4 +159,5 @@ label {
   bottom: 0;
   width: 100%;
   opacity: 0.4;
+  pointer-events: none;
 }

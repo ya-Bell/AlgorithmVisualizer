@@ -48,7 +48,7 @@ body {
 h1 {
     font-size: 30px;
     margin-bottom: 20px;
-    color: #004080;
+    color: #01182e;
 }
 
 .controls {
@@ -179,6 +179,10 @@ button:hover {
     padding: 10px 20px;
     box-sizing: border-box;
     z-index: 1;
+    pointer-events: none;
+}
+.bottom-bar button {
+    pointer-events: auto;
 }
 
 .main-menu-button {
@@ -235,4 +239,5 @@ button:disabled {
     bottom: 0;
     width: 100%;
     opacity: 0.4;
+    pointer-events: none;
   }
