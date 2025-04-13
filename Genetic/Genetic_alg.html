@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Генетический Алгоритм</title>
+  <link rel="stylesheet" href="alg_Genetic.css">
+  <link rel="icon" href="../icon/icon.png" type="image/png">
+</head>
+<body>
+  <header class="page-header">
+    <div class="container-header">
+      <div class="logo">
+        <img src="../logo/icon.png" alt="Algorithm Visualizer Logo" />
+        <span>Algorithm Visualizer</span>
+      </div>
+    </div>
+</header>
+  <div class="container">
+    <h1 class="title">Генетический Алгоритм</h1>
+
+    <div id="coordinates">X: 0, Y: 0</div>
+
+    <div class="controls">
+      <button id="startButton"> Старт</button>
+      <button id="clearButton"> Очистить</button>
+      <button id="multiRunBtn"> 5 запусков</button>
+    </div>
+
+    <div id="statusLabel">Готов к запуску</div>
+    <div  class="canvas-container">
+      <canvas id="canvas" width="700" height="600"></canvas>
+    <section class="section-plot">
+      <canvas id="plotCanvas" width="400" height="600"></canvas>
+    </section>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Algorithm Visualizer</p>
+  </footer>
+
+  <script src="alg_Genetic.js"></script>
+</body>
+
+</html>
