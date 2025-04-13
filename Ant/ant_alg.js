@@ -20,19 +20,19 @@ const maxIterations = 100;
 let pheromones = [];
 let distances = [];
 let bestPathGlobal = null;
+let allPathsOfLastIteration = []; 
 
-// Обработчик клика по канвасу для добавления точек
 canvas.addEventListener("click", (event) => {
-  if (isRunning) return;  // Если алгоритм работает, не даем добавлять точки.
+  if (isRunning) return;
 
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
 
   points.push({ x, y });
-  renderPoints(); // Перерисовываем точки
+  renderPoints();
 
-  if (autoRunCheckbox.checked) runAntAlgorithm(); // Если включен автозапуск, запускаем алгоритм
+  if (autoRunCheckbox.checked) runAntAlgorithm();
 });
 
 startButton.addEventListener("click", () => {
@@ -74,7 +74,6 @@ function runAntAlgorithm() {
   initialize();
   let bestPath = null;
   let bestLength = Infinity;
-  let pathsOfLastIteration = [];
 
   for (let i = 0; i < maxIterations; i++) {
     const { bestInIteration, length, paths, lengths } = runAntsOnce();
@@ -84,7 +83,7 @@ function runAntAlgorithm() {
     }
 
     if (i === maxIterations - 1) {
-      pathsOfLastIteration = paths;
+      allPathsOfLastIteration = paths;
     }
 
     updatePheromones(paths, lengths);
@@ -92,8 +91,8 @@ function runAntAlgorithm() {
 
   bestPathGlobal = bestPath;
   if (bestPath) {
-    renderAllPaths(pathsOfLastIteration); // Сначала рисуем все пути (серые)
-    renderBestPath(bestPath); // Потом рисуем лучший путь
+    renderAllPaths(allPathsOfLastIteration);//серые пути
+    renderBestPath(bestPath); //красные пути
     pathLengthDisplay.textContent = `Длина найденного пути: ${bestLength.toFixed(2)}`;
   }
 
@@ -214,8 +213,6 @@ function updatePheromones(paths, lengths) {
 }
 
 function renderPoints() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   points.forEach((point, i) => {
     ctx.beginPath();
     ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
@@ -226,14 +223,23 @@ function renderPoints() {
 }
 
 function renderBestPath(path) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  //Рисую серые пути
+  renderAllPaths(allPathsOfLastIteration); 
+
+  // Рисую черные точки
+  renderPoints();
+
+  //Рисую только красный путь
+  ctx.strokeStyle = "red";
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(points[path[0]].x, points[path[0]].y);
   for (let i = 1; i < path.length; i++) {
     ctx.lineTo(points[path[i]].x, points[path[i]].y);
   }
   ctx.lineTo(points[path[0]].x, points[path[0]].y);
-  ctx.strokeStyle = "red";
-  ctx.lineWidth = 2;
   ctx.stroke();
 }
 
