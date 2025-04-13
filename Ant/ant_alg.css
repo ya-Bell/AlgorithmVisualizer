@@ -1,150 +1,71 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(90deg, #dff1ff, #8ec5fc);
-  margin: 0;
-  padding: 0;
-  text-align: center;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  background-color: #f8f9fa;
   color: #333;
-  display: flex;
-  flex-direction: column;
-  height: 100%; /* Снимаем ограничение на высоту */
-  overflow-y: auto; /* Добавляем вертикальную прокрутку */
+  margin: 0;
+  padding: 20px;
+  text-align: center;
 }
 
-h1 {
-  font-size: 30px;
-  margin-bottom: 20px;
-  color: #004080;
+.container {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .controls {
-  margin-bottom: 20px;
+  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
-.controls label {
-  margin-right: 10px;
-}
-
-.controls input,
-.controls select,
-.controls button {
-  margin: 5px;
-  font-size: 16px;
-  padding: 6px 10px;
-  border-radius: 5px;
-  border: 1px solid #aaa;
-}
-
-button {
+button, input[type="checkbox"] {
+  padding: 10px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
   background-color: #007bff;
   color: white;
   cursor: pointer;
-  transition: 0.3s;
 }
 
-button:hover {
+button:hover, input[type="checkbox"]:hover {
   background-color: #0056b3;
 }
 
-/* Контейнер для карты */
-#map-container {
-  display: flex;
-  flex-grow: 1; /* Заполняет доступное пространство */
-  flex-direction: column;
-  justify-content: flex-start; /* Вертикальное выравнивание сверху */
-  padding: 10px;
-  overflow: hidden;
-  height: 400px; /* Ограничиваем высоту карты, чтобы она была видимой, и была прокрутка */
-  max-height: calc(100vh - 160px); /* Ограничение по высоте, оставляем место для кнопок */
-}
-
-#map {
-  display: grid;
-  gap: 1px; /* Уменьшаем зазор между клеточками */
-  width: 100%;
-  grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); /* Клетки будут уменьшаться */
-  grid-template-rows: repeat(auto-fill, minmax(30px, 1fr)); /* Клетки будут уменьшаться */
-  justify-content: center; /* Центрируем по горизонтали */
-  max-height: 100%; /* Запрещаем выход за пределы контейнера */
-  overflow: auto; /* Добавляем прокрутку */
-  margin-bottom: 10px; /* Отступ снизу, чтобы не перекрывалась нижней панелью */
-}
-
-.cell {
-  width: 100%; /* Клетка займет всю доступную ширину */
-  height: 100%; /* Клетка займет всю доступную высоту */
-  background-color: #ecf0f1;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.2s ease-in-out;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
-}
-
-.cell.start {
-  background-color: #2ecc71;
-}
-
-.cell.end {
-  background-color: #e74c3c;
-}
-
-.cell.wall {
-  background-color: #34495e;
-}
-
-.cell.visited {
-  background-color: #3498db;
-  animation: visitedFadeIn 0.2s ease-in-out;
-}
-
-.cell.path {
-  background-color: #f39c12;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { background-color: white; }
-  to { background-color: #f39c12; }
-}
-
-@keyframes visitedFadeIn {
-  from { background-color: #ecf0f1; }
-  to { background-color: #3498db; }
-}
-
-#instruction-box {
-  display: none;
-  background-color: #eef7ff;
-  border: 1px solid #a2c4f3;
+canvas {
+  border: 1px solid #000;
   border-radius: 8px;
-  padding: 15px;
-  max-width: 700px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  display: block;
   margin: 10px auto;
-  text-align: left;
-  font-size: 15px;
+}
+
+label {
+  font-size: 16px;
+  color: #333;
+  margin-right: 8px;
+}
+
+#pathLengthDisplay {
+  margin-top: 20px;
+  font-size: 18px;
   color: #333;
 }
 
-#instruction-box p {
-  margin: 5px 0;
-}
-
-.hidden {
-  display: none;
-}
-
-/* Нижняя панель с кнопками */
 .bottom-bar {
   position: fixed;
-  bottom: 0;
+  bottom: 10px;
+  left: 0;
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   padding: 10px 20px;
   box-sizing: border-box;
   z-index: 1000;
-  background-color: transparent;
 }
 
 .main-menu-button {
@@ -185,9 +106,4 @@ button:hover {
 
 .algo-button.current {
   background-color: crimson;
-}
-
-button:disabled {
-  background-color: #999;
-  cursor: not-allowed;
 }
