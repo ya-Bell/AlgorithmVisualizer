@@ -1,5 +1,9 @@
 let map = [], start = null, end = null;
 let isDrawingWalls = false;
+const startButton = document.getElementById('start-pathfinding');
+const mazeButton = document.getElementById('generate-maze');
+const clearButton = document.getElementById('clear-map');
+const generateButton = document.getElementById('generate-map');
 
 document.getElementById('generate-map').addEventListener('click', generateMap);
 document.getElementById('generate-maze').addEventListener('click', generateMaze);
@@ -62,12 +66,12 @@ function handleCellClick(cell, row, col) {
 
 function startPathfinding() {
     if (!start || !end) return alert("Не установлены начальная и конечная точки!");
-
     const { visitedOrder, cameFrom } = aStar(map, start, end);
-
+    toggleUIBlocking(true);
     const endKey = `${end.row},${end.col}`;
     if (!cameFrom[endKey]) {
         alert("Путь не найден!");
+        toggleUIBlocking(false);
         return;
     }
 
@@ -203,3 +207,11 @@ function toggleInstruction() {
     const instructionBox = document.getElementById('instruction-box');
     instructionBox.style.display = instructionBox.style.display === 'none' || instructionBox.style.display === '' ? 'block' : 'none';
 }
+
+// Блокировка интерфейса во время работы
+function toggleUIBlocking(state) {
+    startButton.disabled = state;
+    mazeButton.disabled = state;
+    clearButton.disabled = state;
+    generateButton.disabled = state;
+  }

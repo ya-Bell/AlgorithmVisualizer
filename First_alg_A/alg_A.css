@@ -178,3 +178,8 @@ button:hover {
 .algo-button.current {
     background-color: crimson;
 }
+
+button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+  }
