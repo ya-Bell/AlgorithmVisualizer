@@ -57,6 +57,7 @@ clearButton.addEventListener("click", () => {
 
 resetPheromonesButton.addEventListener("click", () => {
   if (isRunning) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   resetPheromones();
   renderPoints();
   pathLengthDisplay.textContent = '';

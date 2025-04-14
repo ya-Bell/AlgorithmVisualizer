@@ -16,6 +16,12 @@ canvas.addEventListener("click", function (e) {
     drawPoints();
 });
 
+document.getElementById('clusters').addEventListener('input', function () {
+    let value = parseInt(this.value);
+    if (isNaN(value) || value < 1) this.value = 1;
+    if (value > 100) this.value = 100;
+});
+
 document.getElementById("start").addEventListener("click", () => {
     const k = parseInt(document.getElementById("clusters").value);
     if (k < 1 || k > points.length) {
