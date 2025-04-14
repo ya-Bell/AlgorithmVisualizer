@@ -41,10 +41,16 @@ function generateMap() {
 
             cell.addEventListener('mousedown', () => handleCellClick(cell, row, col));
             cell.addEventListener('mouseover', () => {
+                const mode = document.getElementById('mode-select').value;
                 if (isDrawingWalls) {
-                    cell.classList.add('wall');
+                    if (mode === 'wall' || (mode === 'auto' && start && end)) {
+                        if (!cell.classList.contains('start') && !cell.classList.contains('end')) {
+                            cell.classList.add('wall');
+                        }
+                    }
                 }
             });
+            
 
             rowArray.push(cell);
             container.appendChild(cell);
@@ -57,22 +63,39 @@ function generateMap() {
 }
 
 function handleCellClick(cell, row, col) {
-    if (cell.classList.contains('start')) {
-        start = null;
-        cell.classList.remove('start');
-    } else if (cell.classList.contains('end')) {
-        end = null;
-        cell.classList.remove('end');
-    } else if (!start) {
+    const mode = document.getElementById('mode-select').value;
+
+    if (mode === 'start') {
+        if (start) map[start.row][start.col].classList.remove('start');
         start = { row, col };
         cell.classList.add('start');
-    } else if (!end) {
+    } else if (mode === 'end') {
+        if (end) map[end.row][end.col].classList.remove('end');
         end = { row, col };
         cell.classList.add('end');
-    } else {
-        cell.classList.toggle('wall');
+    } else if (mode === 'wall') {
+        if (!cell.classList.contains('start') && !cell.classList.contains('end')) {
+            cell.classList.toggle('wall');
+        }
+    } else if (mode === 'auto') {
+        if (cell.classList.contains('start')) {
+            start = null;
+            cell.classList.remove('start');
+        } else if (cell.classList.contains('end')) {
+            end = null;
+            cell.classList.remove('end');
+        } else if (!start) {
+            start = { row, col };
+            cell.classList.add('start');
+        } else if (!end) {
+            end = { row, col };
+            cell.classList.add('end');
+        } else {
+            cell.classList.toggle('wall');
+        }
     }
 }
+
 
 function startPathfinding() {
     if (!start || !end) {
