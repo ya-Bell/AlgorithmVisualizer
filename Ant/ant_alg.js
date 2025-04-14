@@ -20,7 +20,7 @@ const maxIterations = 100;
 let pheromones = [];
 let distances = [];
 let bestPathGlobal = null;
-let allPathsOfLastIteration = []; 
+let allPathsOfAllIterations = []; 
 
 canvas.addEventListener("click", (event) => {
   if (isRunning) return;
@@ -76,6 +76,9 @@ function runAntAlgorithm() {
   let bestPath = null;
   let bestLength = Infinity;
 
+  // Сохраняем пути на каждой итерации
+  allPathsOfAllIterations = [];
+
   for (let i = 0; i < maxIterations; i++) {
     const { bestInIteration, length, paths, lengths } = runAntsOnce();
     if (length < bestLength) {
@@ -83,20 +86,15 @@ function runAntAlgorithm() {
       bestPath = bestInIteration;
     }
 
-    if (i === maxIterations - 1) {
-      allPathsOfLastIteration = paths;
-    }
+    allPathsOfAllIterations.push(paths);
 
     updatePheromones(paths, lengths);
   }
 
   bestPathGlobal = bestPath;
-  if (bestPath) {
-    renderAllPaths(allPathsOfLastIteration);//серые пути
-    renderBestPath(bestPath); //красные пути
-    pathLengthDisplay.textContent = `Длина найденного пути: ${bestLength.toFixed(2)}`;
-  }
 
+  renderBestPath(bestPath);
+  pathLengthDisplay.textContent = `Длина найденного пути: ${bestLength.toFixed(2)}`;
   isRunning = false;
 }
 
@@ -226,13 +224,12 @@ function renderPoints() {
 function renderBestPath(path) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  //Рисую серые пути
-  renderAllPaths(allPathsOfLastIteration); 
+  // Рисуем все серые пути
+  renderAllPaths(allPathsOfAllIterations);
 
-  // Рисую черные точки
   renderPoints();
 
-  //Рисую только красный путь
+  // Рисуем только лучший путь (красный)
   ctx.strokeStyle = "red";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -245,17 +242,19 @@ function renderBestPath(path) {
 }
 
 function renderAllPaths(paths) {
-  ctx.strokeStyle = "rgba(185, 185, 185, 0.4)";
+  ctx.strokeStyle = "rgba(185, 185, 185, 0.4)";  // Серые пути
   ctx.lineWidth = 1;
-  for (const path of paths) {
-    ctx.beginPath();
-    ctx.moveTo(points[path[0]].x, points[path[0]].y);
-    for (let i = 1; i < path.length; i++) {
-      ctx.lineTo(points[path[i]].x, points[path[i]].y);
-    }
-    ctx.lineTo(points[path[0]].x, points[path[0]].y);
-    ctx.stroke();
-  }
+  paths.forEach((iterationPaths) => {
+    iterationPaths.forEach(path => {
+      ctx.beginPath();
+      ctx.moveTo(points[path[0]].x, points[path[0]].y);
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(points[path[i]].x, points[path[i]].y);
+      }
+      ctx.lineTo(points[path[0]].x, points[path[0]].y);
+      ctx.stroke();
+    });
+  });
 }
 
 function animateBestPath(path) {
