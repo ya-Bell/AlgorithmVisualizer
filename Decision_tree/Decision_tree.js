@@ -32,7 +32,7 @@ document.getElementById('build-tree').addEventListener('click', () => {
   container.innerHTML = '';
   renderTree(tree, container);
 
-  errorMessageElement.textContent = ''; // Скрыть ошибку, если всё правильно
+  errorMessageElement.textContent = '';
 });
 
 document.getElementById('classify').addEventListener('click', () => {
@@ -46,10 +46,8 @@ document.getElementById('classify').addEventListener('click', () => {
 
   const sample = Object.fromEntries(headers.slice(0, -1).map((key, i) => [key, values[i]]));
 
-  // Классификация с выводом пути
   const { result, path } = classify(sample, tree);
   
-  // Выводим путь и результат
   document.getElementById('result').innerHTML = `Результат: ${result}<br>Путь: ${path.join(' → ')}`;
 
   // Отображаем путь на дереве
@@ -146,7 +144,6 @@ function renderTree(node, container, highlightedPath = []) {
 
     li.appendChild(label);
 
-    // Передаём оставшийся путь, если он совпадает
     const nextPath = isHighlighted ? highlightedPath.slice(1) : [];
     renderTree(subtree, li, nextPath);
     ul.appendChild(li);
