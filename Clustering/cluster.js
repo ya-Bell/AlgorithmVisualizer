@@ -12,10 +12,12 @@ canvas.addEventListener("click", function (e) {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    //добавление точки
     points.push({ x, y, cluster: null });
     drawPoints();
 });
 
+//проверка ввода не меньше 1, не больше 100
 document.getElementById('clusters').addEventListener('input', function () {
     let value = parseInt(this.value);
     if (isNaN(value) || value < 1) this.value = 1;
@@ -24,6 +26,7 @@ document.getElementById('clusters').addEventListener('input', function () {
 
 document.getElementById("start").addEventListener("click", () => {
     const k = parseInt(document.getElementById("clusters").value);
+    //проверка k
     if (k < 1 || k > points.length) {
         alert("Введите корректное количество кластеров (1 - " + points.length + ")");
         return;
@@ -38,13 +41,14 @@ document.getElementById("clear").addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
+//сравнение метрик
 document.getElementById("compare").addEventListener("click", () => {
     const k = parseInt(document.getElementById("clusters").value);
     if (points.length === 0 || k < 1 || k > points.length) {
         alert("Недостаточно точек или некорректное значение K");
         return;
     }
-
+    
     const original = points.map(p => ({ ...p }));
     const results = {};
     const colors = {
@@ -52,7 +56,7 @@ document.getElementById("compare").addEventListener("click", () => {
         manhattan: [],
         chebyshev: []
     };
-
+    //кластеризация для каждой метрики
     ["euclidean", "manhattan", "chebyshev"].forEach(metric => {
         points.forEach(p => p.cluster = null);
         kMeansClustering(k, metric, true);
@@ -60,20 +64,21 @@ document.getElementById("compare").addEventListener("click", () => {
         results[metric] = points.map(p => p.cluster);
         colors[metric] = [...clusters.map(c => c.color)];
     });
-
+    //восстанов. оригинала + сравнение
     points = original;
     drawMetricComparison(results, colors);
 });
 
+//функция расстояний
 function getDistance(a, b, metric) {
     const dx = a.x - b.x;
     const dy = a.y - b.y;
     switch (metric) {
-        case "euclidean":
+        case "euclidean": // Обычное расстояние √(dx² + dy²)
             return Math.hypot(dx, dy); 
-        case "manhattan":
+        case "manhattan": // Сумма модулей |dx| + |dy|
             return Math.abs(dx) + Math.abs(dy);
-        case "chebyshev":
+        case "chebyshev": // Максимум из модулей max(|dx|, |dy|)
             return Math.max(Math.abs(dx), Math.abs(dy));
         default:
             return Math.hypot(dx, dy);
@@ -92,10 +97,12 @@ function initializeClusters(k) {
     }
 }
 
+//точки-кластеры
 function assignPointsToClusters(metric) {
     points.forEach(p => {
         let minDist = Infinity;
         let clusterIndex = 0;
+        //ближайший центр
         clusters.forEach((c, i) => {
             const dist = getDistance(p, c, metric);
             if (dist < minDist) {
@@ -111,6 +118,7 @@ function updateClusterCenters() {
     clusters.forEach((c, i) => {
         const assigned = points.filter(p => p.cluster === i);
         if (assigned.length) {
+            //новый центр - среднее всех
             c.x = assigned.reduce((sum, p) => sum + p.x, 0) / assigned.length;
             c.y = assigned.reduce((sum, p) => sum + p.y, 0) / assigned.length;
         }
@@ -125,7 +133,7 @@ function drawPoints() {
         ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
         ctx.fill();
     });
-
+    //БОЛЬШИЕ!!!
     clusters.forEach(c => {
         ctx.strokeStyle = "#000";
         ctx.lineWidth = 2;
@@ -137,10 +145,11 @@ function drawPoints() {
     });
 }
 
+//отрисовка сравнений
 function drawMetricComparison(results, colors) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const offset = 6;
+    const offset = 6;//смещение
 
     points.forEach((p, i) => {
         const dxs = [-offset, 0, offset];
@@ -157,7 +166,7 @@ function drawMetricComparison(results, colors) {
         });
     });
 }
-
+//отображение букв метрик рядом с центрами кластеров
 function drawMetricLabels() {
     const metric = metricSelect.value;
     clusters.forEach(c => {
