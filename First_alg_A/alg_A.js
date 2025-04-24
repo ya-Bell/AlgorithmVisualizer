@@ -11,16 +11,18 @@ document.getElementById('start-pathfinding').addEventListener('click', startPath
 document.getElementById('clear-map').addEventListener('click', clearMap);
 document.getElementById('toggle-instruction').addEventListener('click', toggleInstruction);
 
+// размер карта, мин 2 макс 50 
 document.getElementById('size').addEventListener('input', function () {
     let value = parseInt(this.value);
     if (isNaN(value) || value < 2) this.value = 2;
     if (value > 50) this.value = 50;
 });
 
+//генерация карты 
 function generateMap() {
     const size = +document.getElementById('size').value;
 
-    // Сброс данных
+    // cброс данных
     map = [];
     start = null;
     end = null;
@@ -28,7 +30,7 @@ function generateMap() {
 
     const container = document.getElementById('map');
     container.innerHTML = '';
-    container.style.gridTemplateColumns = `repeat(${size}, 40px)`;
+    container.style.gridTemplateColumns = `repeat(${size}, 40px)`;//размер
     container.style.gridTemplateRows = `repeat(${size}, 40px)`;
 
     for (let row = 0; row < size; row++) {
@@ -58,10 +60,11 @@ function generateMap() {
         map.push(rowArray);
     }
 
-    document.addEventListener('mousedown', () => isDrawingWalls = true);
-    document.addEventListener('mouseup', () => isDrawingWalls = false);
+    document.addEventListener('mousedown', () => isDrawingWalls = true);//начало рисования
+    document.addEventListener('mouseup', () => isDrawingWalls = false);//конец рисования
 }
 
+//нажатия(клики)
 function handleCellClick(cell, row, col) {
     const mode = document.getElementById('mode-select').value;
 
@@ -96,7 +99,7 @@ function handleCellClick(cell, row, col) {
     }
 }
 
-
+//запуск поиска
 function startPathfinding() {
     if (!start || !end) {
         alert("Не установлены начальная и конечная точки!");
@@ -113,12 +116,12 @@ function startPathfinding() {
     }
 
     const { visitedOrder, cameFrom } = aStar(map, start, end);
-    toggleUIBlocking(true);
+    toggleUIBlocking(true);//блок кнопки
 
     const endKey = `${end.row},${end.col}`;
     if (!cameFrom[endKey]) {
         alert("Путь не найден!");
-        toggleUIBlocking(false);
+        toggleUIBlocking(false);//анблок кнопки
         return;
     }
 
@@ -181,10 +184,10 @@ function getNeighbors(cell, map) {
         const newRow = cell.row + dx;
         const newCol = cell.col + dy;
 
-        if (
+        if (//проверка границы
             newRow >= 0 && newRow < map.length &&
             newCol >= 0 && newCol < map[0].length &&
-            !map[newRow][newCol].classList.contains('wall')
+            !map[newRow][newCol].classList.contains('wall')//не стена
         ) {
             neighbors.push({ row: newRow, col: newCol });
         }
@@ -193,7 +196,7 @@ function getNeighbors(cell, map) {
     return neighbors;
 }
 
-
+//восстановление пути
 function reconstructPath(cameFrom, end) {
     const path = [];
     let current = end;
@@ -213,7 +216,7 @@ function animateExploration(visitedOrder, onComplete) {
                 element.classList.add('visited');
             }
             if (index === visitedOrder.length - 1) {
-                setTimeout(onComplete, 200);
+                setTimeout(onComplete, 200);//запуск 
             }
         }, index * 30);
     });
@@ -250,7 +253,7 @@ function generateMaze() {
     
     map.forEach(row => row.forEach(cell => {
         if (!cell.classList.contains('start') && !cell.classList.contains('end')) {
-            cell.classList.toggle('wall', Math.random() > 0.7);
+            cell.classList.toggle('wall', Math.random() > 0.7); //расстановка рандомных стен
         }
     }));
 }
@@ -264,10 +267,10 @@ function clearMap() {
 
 function toggleInstruction() {
     const instructionBox = document.getElementById('instruction-box');
-    instructionBox.style.display = instructionBox.style.display === 'none' || instructionBox.style.display === '' ? 'block' : 'none';
+    instructionBox.style.display = instructionBox.style.display === 'none' || instructionBox.style.display === '' ? 'block' : 'none';// показываем / скрываем
 }
 
-// Блокировка интерфейса во время работы
+// блокировка интерфейса во время работы
 function toggleUIBlocking(state) {
     startButton.disabled = state;
     mazeButton.disabled = state;

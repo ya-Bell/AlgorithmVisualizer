@@ -80,7 +80,7 @@ button:hover {
     background-color: #0056b3;
 }
 
-/* Контейнер для карты */
+/* карта */
 #map-container {
     display: flex;
     flex-grow: 1;
@@ -89,18 +89,18 @@ button:hover {
     padding: 10px;
     overflow: hidden;
     height: 400px;
-    max-height: calc(100vh - 160px);
+    max-height: calc(100vh - 160px); /* чтобы влезло )) */
 }
 
 #map {
     display: grid;
     gap: 1px;
     width: 100%;
-    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); /* авто-заполнение */
     grid-template-rows: repeat(auto-fill, minmax(30px, 1fr));
     justify-content: center;
     max-height: 100%;
-    overflow: auto;
+    overflow: auto; /* если большая - скролл */
     margin-bottom: 10px;
 }
 
@@ -147,7 +147,7 @@ button:hover {
 }
 
 #instruction-box {
-    display: none;
+    display: none; /* изначально скрыто */
     background-color: #eef7ff;
     border: 1px solid #a2c4f3;
     border-radius: 8px;
@@ -164,10 +164,10 @@ button:hover {
 }
 
 .hidden {
-    display: none;
+    display: none; 
 }
 
-/* Нижняя панель с кнопочками */
+/* нижняя панель с кнопочками */
 .bottom-bar {
     position: fixed;
     bottom: 10px;
@@ -178,11 +178,11 @@ button:hover {
     align-items: flex-end;
     padding: 10px 20px;
     box-sizing: border-box;
-    z-index: 1;
+    z-index: 1; /*поверх всего */
     pointer-events: none;
 }
 .bottom-bar button {
-    pointer-events: auto;
+    pointer-events: auto; /* разрешение на клики */
 }
 
 .main-menu-button {
@@ -222,12 +222,12 @@ button:hover {
 }
 
 .algo-button.current {
-    background-color: crimson;
+    background-color: crimson; /*выделение текущего */
 }
 
 button:disabled {
     background-color: #999;
-    cursor: not-allowed;
+    cursor: not-allowed; /*запрет кликов */
 }
 
 .footer {
