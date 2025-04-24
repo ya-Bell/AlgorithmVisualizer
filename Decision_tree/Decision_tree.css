@@ -2,17 +2,16 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background: linear-gradient(to bottom right, #dff1ff, #8ec5fc);
   text-align: center;
-  background-attachment: fixed;
+  background-attachment: fixed; /* фон не двигается при скролле */
   background-repeat: no-repeat;
   background-size: cover;
 }
 
-/* Header & logo */
 .page-header {
-  background-color: #f3eaea49;
+  background-color: #f3eaea49; /* легкий прозрачный фон */
   padding: 10px 32px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  border-radius: 18px;
+  border-radius: 18px; 
 }
 
 .page-header .container {
@@ -32,7 +31,7 @@ body {
 .logo img {
   width: 30px;
   height: 30px;
-  margin-right: 8px;
+  margin-right: 8px; /* небольшой отступ справа от картинки */
 }
 
 .container-header {
@@ -41,7 +40,7 @@ body {
 }
 
 .container {
-  padding: 24px;
+  padding: 24px; /* внутренние отступы */
 }
 
 h1 {
@@ -55,7 +54,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 10px; /* расстояние между кнопками */
 }
 
 button {
@@ -70,12 +69,12 @@ button {
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #0056b3; /* темнее при наведении */
 }
 
 button:disabled {
   background-color: #999;
-  cursor: not-allowed;
+  cursor: not-allowed; /* курсор запрещен */
 }
 
 textarea, input {
@@ -100,7 +99,6 @@ textarea, input {
   margin: 10px 0;
 }
 
-/* Структура дерева */
 #tree-display ul {
   list-style-type: none;
   padding-left: 20px;
@@ -124,7 +122,7 @@ textarea, input {
   font-size: 18px;
   color: #333;
 }
-/* Нижняя панель */
+
 .bottom-bar {
   position: fixed;
   bottom: 10px;
@@ -136,11 +134,11 @@ textarea, input {
   padding: 10px 20px;
   box-sizing: border-box;
   z-index: 1000;
-  pointer-events: none;
+  pointer-events: none; /* чтобы клики не мешали */
 }
 
 .bottom-bar button {
-  pointer-events: auto;
+  pointer-events: auto; /* кнопки кликабельны */
 }
 
 .main-menu-button {
@@ -180,10 +178,9 @@ textarea, input {
 }
 
 .algo-button.current {
-  background-color: crimson;
+  background-color: crimson; /* выделяю текущую кнопку */
 }
 
-/* Футер */
 .footer {
   text-align: center;
   font-size: 14px;
@@ -193,11 +190,9 @@ textarea, input {
   bottom: 0;
   width: 100%;
   opacity: 0.4;
-  pointer-events: none;
+  pointer-events: none; /* чтобы не мешал кликам */
 }
 
-
-/* Стилизация дерева решений */
 .tree-branch-list {
   list-style: none;
   padding-left: 20px;
@@ -212,7 +207,7 @@ textarea, input {
   left: 10px;
   width: 2px;
   height: 100%;
-  background-color: #644215;
+  background-color: #644215; /* линия слева для дерева */
 }
 
 .tree-node {
@@ -228,7 +223,7 @@ textarea, input {
   left: -10px;
   width: 20px;
   height: 2px;
-  background-color: #644215;
+  background-color: #644215; /* горизонтальная линия */
 }
 
 .tree-branch {
@@ -246,3 +241,13 @@ textarea, input {
   color: green;
   font-weight: bold;
 }
+
+#example-data {
+  background-color: #28a745;
+  margin-right: 10px;
+}
+
+#example-data:hover {
+  background-color: #218838;
+}
+

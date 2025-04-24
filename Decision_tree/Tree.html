@@ -15,16 +15,30 @@
         <span>Algorithm Visualizer</span>
       </div>
     </div>
-</header>
+  </header>
   
   <h1>Дерево решений</h1> 
 
-  <h3>Обучающая выборка (CSV)</h3>
-  <textarea id="training-data" rows="8" placeholder="Погода,День недели,Есть компания,Поехал&#10;солнечно,суббота,да,да&#10;пасмурно,вторник,нет,нет&#10;..."></textarea>
-  <button id="build-tree">Построить дерево</button>
-  
+  <div class="input-section">
+    <h3>Обучающая выборка (CSV)</h3>
+    <div class="controls">
+      <button id="example-data" class="example-button">Пример данных</button>
+      <button id="build-tree">Построить дерево</button>
+    </div>
+    <textarea id="training-data" rows="8" placeholder="Введите данные в CSV формате. Первая строка - заголовки, остальные - данные. Пример:&#10;Погода,День недели,Есть компания,Поехал&#10;солнечно,суббота,да,да&#10;пасмурно,вторник,нет,нет&#10;дождь,понедельник,да,нет&#10;солнечно,вторник,да,да&#10;солнечно,вторник,нет,нет"></textarea>
+    <div id="error-message" class="error-message"></div>
+  </div>
 
-  <div id="tree-display"></div>
+  <div id="tree-display" class="tree-container"></div>
+
+  <div class="classification-section">
+    <h3>Классификация нового примера</h3>
+    <div class="classification-controls">
+      <input id="test-input" placeholder="Введите значения через запятую (например: пасмурно,среда,да)"/>
+      <button id="classify">Классифицировать</button>
+    </div>
+    <div id="result" class="result-output"></div>
+  </div>
 
   <div class="bottom-bar">
     <button class="main-menu-button" onclick="document.location='../Main_site/index.html'">Главное меню</button>
@@ -37,11 +51,6 @@
       <button class="algo-button" onclick="location.href='nn.html'">Нейронная сеть</button>
     </div>
   </div>
-
-  <h3>Узнать решение примера (CSV)</h3>
-  <input id="test-input" placeholder="солнечно,пятница,нет"/>
-  <button id="classify">Узнать</button>
-  <div id="result"></div>
 
   <footer class="footer">
     <p>© 2025 Algorithm Visualizer</p>
