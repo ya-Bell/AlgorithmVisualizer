@@ -22,6 +22,7 @@ let distances = [];
 let bestPathGlobal = null;
 let allPathsOfAllIterations = []; 
 
+// 1 клик- 1 точка
 canvas.addEventListener("click", (event) => {
   if (isRunning) return;
 
@@ -35,6 +36,7 @@ canvas.addEventListener("click", (event) => {
   if (autoRunCheckbox.checked) runAntAlgorithm();
 });
 
+//запуск по кнопке
 startButton.addEventListener("click", () => {
   if (isRunning) return;
   if (points.length < 3) {
@@ -45,6 +47,7 @@ startButton.addEventListener("click", () => {
   runAntAlgorithm();
 });
 
+//очистка 
 clearButton.addEventListener("click", () => {
   if (isRunning) return;
   points = [];
@@ -117,6 +120,7 @@ function runAntsOnce() {
   return { bestInIteration, length: bestLength, paths, lengths };
 }
 
+//генерация путь для 1 муравья 
 function generateAntPath() {
   const path = [];
   const visited = Array(points.length).fill(false);
@@ -134,6 +138,7 @@ function generateAntPath() {
   return path;
 }
 
+//выбор точки(феромоны,расстояния)
 function selectNextPoint(current, visited) {
   const probabilities = points.map((_, i) => {
     if (visited[i]) return 0;
@@ -147,7 +152,7 @@ function selectNextPoint(current, visited) {
 
   const normalized = probabilities.map(p => p / total);
 
-  let rand = Math.random(), sum = 0;
+  let rand = Math.random(), sum = 0; //рандомно выбираем
   for (let i = 0; i < normalized.length; i++) {
     sum += normalized[i];
     if (rand <= sum) return i;
@@ -182,15 +187,17 @@ function createMatrix(size, initialValue = 0) {
   return Array.from({ length: size }, () => Array(size).fill(initialValue));
 }
 
+//счёт расстояний между точками
 function calculatePathLength(path) {
   let length = 0;
   for (let i = 0; i < path.length - 1; i++) {
     length += distances[path[i]][path[i + 1]];
   }
-  length += distances[path[path.length - 1]][path[0]];
+  length += distances[path[path.length - 1]][path[0]];//возврат в начало
   return length;
 }
 
+// обнов. феромоны, учитывая испарения + новые пути
 function updatePheromones(paths, lengths) {
   for (let i = 0; i < pheromones.length; i++) {
     for (let j = 0; j < pheromones[i].length; j++) {
@@ -210,26 +217,26 @@ function updatePheromones(paths, lengths) {
     pheromones[first][last] += 1 / length;
   });
 }
-
+//рисовалка
 function renderPoints() {
   points.forEach((point, i) => {
     ctx.beginPath();
     ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
     ctx.fillStyle = "black";
     ctx.fill();
-    ctx.fillText(i + 1, point.x + 5, point.y - 5);
+    ctx.fillText(i + 1, point.x + 5, point.y - 5);//подписываю точки
   });
 }
-
+//лучший путь-рисовалка красным
 function renderBestPath(path) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Рисуем все серые пути
+  // рисуем все серые пути
   renderAllPaths(allPathsOfAllIterations);
 
   renderPoints();
 
-  // Рисуем только лучший путь (красный)
+  // рисуем только лучший путь (красный)
   ctx.strokeStyle = "red";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -257,6 +264,7 @@ function renderAllPaths(paths) {
   });
 }
 
+//анимация красного пути(теперь он зеленый....)
 function animateBestPath(path) {
   renderPoints();
   let step = 0;
@@ -271,5 +279,5 @@ function animateBestPath(path) {
     ctx.stroke();
     step++;
     if (step === path.length) clearInterval(interval);
-  }, 200);
+  }, 200);//каждый шаг через 200 мс
 }

@@ -3,11 +3,10 @@ body {
   background: linear-gradient(to bottom right, #dff1ff, #8ec5fc);
   color: #333;
   text-align: center;
-  background-attachment: fixed;
+  background-attachment: fixed; /* фон не двигается */  
   background-repeat: no-repeat;
   background-size: cover;
 }
-/* Header & logo */
 .page-header {
   background-color: #f3eaea49;
   padding: 10px 32px;
@@ -17,7 +16,7 @@ body {
 
 .page-header .container {
   display: flex;
-  align-items: center;
+  align-items: center; /* вертикальное выравнивание */
 }
 
 .logo {
@@ -92,7 +91,8 @@ label {
   font-size: 18px;
   color: #333;
 }
-
+ 
+/* нижняя панелька с кнопочками */
 .bottom-bar {
   position: fixed;
   bottom: 10px;
@@ -147,7 +147,7 @@ label {
 }
 
 .algo-button.current {
-  background-color: crimson;
+  background-color: crimson; /*выделение текущего */
 }
 
 .footer {
