@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Нейронная сеть</title>
+  <link rel="stylesheet" href="nn.css" />
+  <script src="https://unpkg.com/brain.js"></script>
+  <link rel="icon" href="../logo/icon.png" type="image/png">
+</head>
+<body>
+  <header class="page-header">
+    <div class="container-header">
+      <div class="logo">
+        <img src="../logo/icon.png" alt="Algorithm Visualizer Logo" />
+        <span>Algorithm Visualizer</span>
+      </div>
+    </div>
+  </header>
+
+  <h1 class="page-name">Нейронная сеть</h1>
+
+  <div class="container">
+    <div class="main">
+      <h1>Нарисуй цифру (50×50)</h1>
+      <div id="grid"></div>
+
+      <div class="tools">
+        <label>Инструмент:
+          <select id="tool">
+            <option value="pen">Ручка</option>
+            <option value="spray">Спрей</option>
+            <option value="eraser">Ластик</option>
+          </select>
+        </label>
+        <label>Ширина:
+          <input type="range" id="brushSize" min="1" max="4" value="1" />
+          <span id="brushValue">1</span>
+        </label>
+      </div>
+
+      <div class="controls">
+        <button id="predictBtn">Угадать</button>
+        <button id="clearBtn">Очистить</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div id="result">Результат: ...</div>
+      <h2>Сжатая цифра (28×28)</h2>
+      <div id="preview28" class="preview-grid"></div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="main-menu-button" onclick="document.location='../Main_site/index.html'">Главное меню</button>
+    <div class="algo-buttons">
+      <button class="algo-button" onclick="location.href='../First_alg_A/First_alg_A.html'">A*</button>
+      <button class="algo-button" onclick="location.href='../Clustering/cluster.html'">Кластеризация</button>
+      <button class="algo-button" onclick="location.href='../Genetic/Genetic_alg.html'">Генетический алгоритм</button>
+      <button class="algo-button" onclick="location.href='../Ant/Algorithm_ant.html'">Муравьиный алгоритм</button>
+      <button class="algo-button" onclick="location.href='../Decision_tree/Tree.html'">Дерево решений</button>
+      <button class="algo-button current">Нейронная сеть</button>
+    </div>
+  </div>
+
+  <footer class="footer-footer">
+    <p>© 2025 Algorithm Visualizer</p>
+  </footer>
+
+  <script src="nn.js"></script>
+</body>
+</html>
