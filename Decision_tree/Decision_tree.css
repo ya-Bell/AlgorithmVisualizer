@@ -243,11 +243,11 @@ textarea, input {
 }
 
 #example-data {
-  background-color: #28a745;
+  background-color: #007bff;
   margin-right: 10px;
 }
 
 #example-data:hover {
-  background-color: #218838;
+  background-color: #0056b3;
 }
 
