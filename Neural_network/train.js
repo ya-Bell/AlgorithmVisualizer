@@ -4,13 +4,18 @@ const mnist = require('mnist');
 
 const set = mnist.set(60000, 10000); // MNIST
 
-const net = new brain.NeuralNetwork();
+const net = new brain.NeuralNetwork({
+  hiddenLayers: [128, 64], // 2 скртых слоя по 128 и 64 нейрона
+  inputSize: 784, // 28x28 = 784
+  activation: 'relu', // вместо sigmoid используем relu, быстрее, чем sigmoid
+  outputSize: 10, // 10 классов (0-9)
+});
 net.train(set.training, {
-  errorThresh: 0.005,
-  iterations: 20000,
-  log: true,
-  logPeriod: 50,
-  learningRate: 0.3
+  errorThresh: 0.005, // ошибка 0.5%
+  iterations: 20000, // 20 000 итераций
+  log: true, // выводим лог в консоль
+  logPeriod: 50, // каждые 50 итераций
+  learningRate: 0.01 // скорость обучения
 });
 
 fs.writeFileSync('model.json', JSON.stringify(net.toJSON()));
