@@ -31,10 +31,7 @@ function getClickedPointIndex(x, y, points, radius = 7) {
   }
   return -1;
 }
-// сообщение перед загрузкой
-window.addEventListener("load", () => {
-  drawIntroMessage();
-});
+
 function drawIntroMessage() {
   const ctx = canvasPlotContext;
   ctx.clearRect(0, 0, canvasPlot.width, canvasPlot.height);
