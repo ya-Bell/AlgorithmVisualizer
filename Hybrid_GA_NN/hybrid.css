@@ -39,8 +39,6 @@ body {
   padding: 0 20px;
 }
 
-
-
 .container {
   max-width: 1400px;
   margin: 20px auto;
@@ -52,6 +50,7 @@ body {
   color: #01182e;
   font-size: 28px;
   margin-bottom: 10px;
+  margin-top: 0px;
 }
 
 .subtitle {
