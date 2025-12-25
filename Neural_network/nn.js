@@ -190,6 +190,11 @@ document.getElementById('clearBtn').addEventListener('click', () => {
     pixel.classList.add('preview-pixel');
     preview.appendChild(pixel);
   }
+  const confidenceDiv = document.getElementById('confidence');
+  if (confidenceDiv) {
+    confidenceDiv.innerHTML = '';
+  }
+  lastNormalizedInput = null;
 });
 
 
@@ -264,6 +269,9 @@ function resizeInputAvg(input, width, height, newWidth, newHeight) {
 }
 
 
+// Глобальная переменная для хранения последнего нормализованного входа
+let lastNormalizedInput = null;
+
 // обработка и предсказание числа
 document.getElementById('predictBtn').addEventListener('click', () => {
   const pixels = Array.from(document.querySelectorAll('.pixel')).map(p => p.classList.contains('active') ? 1 : 0);
@@ -274,6 +282,8 @@ document.getElementById('predictBtn').addEventListener('click', () => {
   const compressed = resizeInputAvg(pixels, 50, 50, 28, 28);
   const resizedInput = centerAndNormalize(compressed, 28, 28);
   const normalized = resizedInput.map(v => Math.min(1, v * 2.5));
+  lastNormalizedInput = normalized; // Сохраняем для дообучения
+  
   const preview = document.getElementById('preview28');
   preview.innerHTML = '';
   normalized.forEach(val => {
@@ -287,7 +297,92 @@ document.getElementById('predictBtn').addEventListener('click', () => {
   console.log('Prediction output:', output);
   const predicted = Object.entries(output).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
   resultDiv.textContent = `Результат: ${predicted}`;
+  
+  // Отображение вероятностей всех цифр
+  const confidenceDiv = document.getElementById('confidence');
+  if (confidenceDiv) {
+    // Нормализуем вероятности (сумма = 100%)
+    const sum = Object.values(output).reduce((a, b) => a + b, 0);
+    const normalizedOutput = {};
+    Object.keys(output).forEach(key => {
+      normalizedOutput[key] = sum > 0 ? output[key] / sum : 0;
+    });
+    
+    let confidenceHTML = '<strong>Вероятности по всем цифрам:</strong>';
+    Object.entries(normalizedOutput)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([digit, conf]) => {
+        const percent = (conf * 100).toFixed(1);
+        const isPredicted = digit === predicted;
+        confidenceHTML += `
+          <div class="confidence-item" style="${isPredicted ? 'font-weight: 600; color: #667eea;' : ''}">
+            <span>${digit}:</span>
+            <div class="confidence-bar">
+              <div class="confidence-bar-fill" style="width: ${percent}%"></div>
+            </div>
+            <span style="min-width: 45px; text-align: right;">${percent}%</span>
+          </div>
+        `;
+      });
+    confidenceDiv.innerHTML = confidenceHTML;
+  }
 });
+
+// Обработчик дообучения
+const retrainBtn = document.getElementById('retrainBtn');
+if (retrainBtn) {
+  retrainBtn.addEventListener('click', async () => {
+    if (!net) {
+      alert('Модель не загружена!');
+      return;
+    }
+    
+    if (!lastNormalizedInput) {
+      alert('Сначала нарисуйте и распознайте цифру!');
+      return;
+    }
+    
+    const pixels = Array.from(document.querySelectorAll('.pixel')).map(p => p.classList.contains('active') ? 1 : 0);
+    if (pixels.every(p => p === 0)) {
+      alert('Нарисуйте цифру для дообучения!');
+      return;
+    }
+    
+    // Спрашиваем правильный ответ
+    const correctDigit = prompt('Какую цифру вы нарисовали? (0-9):');
+    if (correctDigit === null || isNaN(correctDigit) || correctDigit < 0 || correctDigit > 9) {
+      return;
+    }
+    
+    const output = new Array(10).fill(0);
+    output[parseInt(correctDigit)] = 1;
+    
+    // Дообучаем сеть на этом примере
+    retrainBtn.disabled = true;
+    retrainBtn.textContent = '🔄 Дообучение...';
+    
+    const trainingData = [{ input: lastNormalizedInput, output }];
+    
+    await new Promise(resolve => {
+      setTimeout(() => {
+        net.train(trainingData, {
+          iterations: 50,
+          learningRate: 0.01,
+          log: false
+        });
+        setTimeout(resolve, 100);
+      }, 10);
+    });
+    
+    retrainBtn.disabled = false;
+    retrainBtn.textContent = '🔄 Дообучить';
+    
+    alert('Модель дообучена! Попробуйте распознать цифру снова.');
+    
+    // Автоматически распознаем снова
+    document.getElementById('predictBtn').click();
+  });
+}
 
 
 // Превью перед загрузкой
@@ -297,5 +392,39 @@ window.addEventListener('DOMContentLoaded', () => {
     const pixel = document.createElement('div');
     pixel.classList.add('preview-pixel');
     preview.appendChild(pixel);
+  }
+});
+
+// Функция для переключения меню
+function toggleMenu() {
+  const menuContent = document.getElementById('menuContent');
+  const menuToggle = document.getElementById('menuToggle');
+  if (menuContent) {
+    const isActive = menuContent.classList.toggle('active');
+    // Поднимаем/опускаем кнопку вместе с меню
+    if (menuToggle) {
+      if (isActive) {
+        menuToggle.style.bottom = '80px';
+      } else {
+        menuToggle.style.bottom = '15px';
+      }
+    }
+  }
+}
+
+// Закрытие меню при клике вне его
+document.addEventListener('click', (e) => {
+  const bottomBar = document.getElementById('bottomBar');
+  const menuToggle = document.getElementById('menuToggle');
+  const menuContent = document.getElementById('menuContent');
+  
+  if (bottomBar && menuContent && menuContent.classList.contains('active')) {
+    if (!bottomBar.contains(e.target) && e.target !== menuToggle) {
+      menuContent.classList.remove('active');
+      // Опускаем кнопку обратно
+      if (menuToggle) {
+        menuToggle.style.bottom = '15px';
+      }
+    }
   }
 });

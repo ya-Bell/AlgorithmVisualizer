@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Гибридный алгоритм: ГА + НС</title>
+  <link rel="stylesheet" href="hybrid.css">
+  <script src="https://unpkg.com/brain.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mnist@1.1.0/dist/mnist.min.js"></script>
+  <link rel="icon" href="../logo/icon.png" type="image/png">
+</head>
+<body>
+  <header class="page-header">
+    <div class="container-header">
+      <div class="logo">
+        <img src="../logo/icon.png" alt="Algorithm Visualizer Logo" />
+        <span>Algorithm Visualizer</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="title">Оптимизация нейронной сети генетическим алгоритмом</h1>
+    <p class="subtitle">Автоматический подбор гиперпараметров нейронной сети для распознавания цифр</p>
+
+    <div class="info-box">
+      <h3>📖 Как это работает:</h3>
+      <ol>
+        <li><strong>Настройте параметры</strong> (или оставьте значения по умолчанию)</li>
+        <li><strong>Нажмите "Запустить оптимизацию"</strong> - алгоритм начнет искать лучшие параметры</li>
+        <li><strong>Наблюдайте за процессом:</strong> генетический алгоритм создает популяцию конфигураций, обучает сети и выбирает лучшие</li>
+        <li><strong>Смотрите результаты:</strong> график показывает улучшение точности, внизу - лучшие конфигурации</li>
+        <li><strong>Протестируйте сеть:</strong> после оптимизации нарисуйте цифру и проверьте результат</li>
+      </ol>
+      <p><strong> Предупреждение: </strong>Оптимизация может занять от 3 до 10 минут, если кажется, что сайт не отвечает, то просто подождите.</p>
+    </div>
+
+    <div class="main-content">
+      <div class="left-panel">
+        <div class="config-section">
+          <h2>Параметры генетического алгоритма</h2>
+          <div class="param-group">
+            <label>Размер популяции: <span id="popSizeValue">10</span></label>
+            <input type="range" id="popSize" min="5" max="30" value="10">
+          </div>
+          <div class="param-group">
+            <label>Количество поколений: <span id="genValue">5</span></label>
+            <input type="range" id="generations" min="3" max="15" value="5">
+          </div>
+          <div class="param-group">
+            <label>Вероятность мутации: <span id="mutValue">0.1</span></label>
+            <input type="range" id="mutation" min="0" max="100" value="10" step="5">
+          </div>
+          <div class="param-group">
+            <label>Вероятность кроссовера: <span id="crossValue">0.8</span></label>
+            <input type="range" id="crossover" min="0" max="100" value="80" step="5">
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h2>Диапазоны гиперпараметров НС</h2>
+          <div class="param-group">
+            <label>Скрытые слои: <span id="layersValue">1-3</span></label>
+            <div class="range-inputs">
+              <input type="number" id="minLayers" min="1" max="5" value="1" style="width: 60px;">
+              <span> - </span>
+              <input type="number" id="maxLayers" min="1" max="5" value="3" style="width: 60px;">
+            </div>
+          </div>
+          <div class="param-group">
+            <label>Нейронов в слое: <span id="neuronsValue">32-128</span></label>
+            <div class="range-inputs">
+              <input type="number" id="minNeurons" min="16" max="256" value="32" step="16" style="width: 60px;">
+              <span> - </span>
+              <input type="number" id="maxNeurons" min="16" max="256" value="128" step="16" style="width: 60px;">
+            </div>
+          </div>
+          <div class="param-group">
+            <label>Learning Rate: <span id="lrValue">0.001-0.1</span></label>
+            <div class="range-inputs">
+              <input type="number" id="minLR" min="0.001" max="0.5" value="0.001" step="0.001" style="width: 70px;">
+              <span> - </span>
+              <input type="number" id="maxLR" min="0.001" max="0.5" value="0.1" step="0.001" style="width: 70px;">
+            </div>
+          </div>
+          <div class="param-group">
+            <label>Функции активации для оптимизации:</label>
+            <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;">
+              <label style="font-weight: normal; cursor: pointer;">
+                <input type="checkbox" id="actRelu" checked> ReLU (быстрая, популярная)
+              </label>
+              <label style="font-weight: normal; cursor: pointer;">
+                <input type="checkbox" id="actSigmoid" checked> Sigmoid (S-образная)
+              </label>
+              <label style="font-weight: normal; cursor: pointer;">
+                <input type="checkbox" id="actTanh" checked> Tanh (гиперболический тангенс)
+              </label>
+            </div>
+          </div>
+          <div class="param-group">
+            <label>Источник данных для обучения:</label>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+              <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <input type="radio" name="dataSource" id="dataSynthetic" value="synthetic" checked>
+                <span>Синтетические данные (быстро, ~50-70% точность)</span>
+              </label>
+              <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <input type="radio" name="dataSource" id="dataMNIST" value="mnist">
+                <span>MNIST (реальные данные, медленнее, ~80-95% точность)</span>
+              </label>
+            </div>
+            <small style="color: #666; font-size: 12px;">MNIST даст лучшую точность, но обучение займет больше времени</small>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="startBtn" class="btn-primary">Запустить оптимизацию</button>
+          <button id="stopBtn" class="btn-secondary" disabled>Остановить</button>
+          <button id="resetBtn" class="btn-secondary">Сбросить</button>
+          <button id="saveModelBtn" class="btn-secondary" disabled>💾 Сохранить модель</button>
+        </div>
+
+        <div class="status-section">
+          <div id="status">Готов к запуску</div>
+          <div id="currentGen">Поколение: -</div>
+          <div id="bestAccuracy">Лучшая точность: -</div>
+          <div id="bestConfig">Лучшая конфигурация: -</div>
+          <div id="progressBar" style="display: none; margin-top: 15px;">
+            <div style="background: #e0e0e0; border-radius: 10px; height: 20px; overflow: hidden;">
+              <div id="progressFill" style="background: #007bff; height: 100%; width: 0%; transition: width 0.3s; text-align: center; line-height: 20px; color: white; font-size: 12px;">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div class="chart-section">
+          <h2>График эволюции точности</h2>
+          <canvas id="evolutionChart"></canvas>
+        </div>
+
+        <div class="network-section">
+          <h2>Архитектура лучшей сети</h2>
+          <div id="networkArchitecture">-</div>
+        </div>
+
+        <div class="results-section">
+          <h2>Топ-5 конфигураций</h2>
+          <div id="topConfigs">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Секция для тестирования найденной сети -->
+    <div class="test-section" id="testSection" style="display: none;">
+      <h2 class="section-title">🧪 Тестирование найденной сети</h2>
+      <p class="section-subtitle">Нарисуйте цифру ниже, чтобы проверить, как работает оптимизированная нейронная сеть</p>
+      
+      <div class="test-container">
+        <div class="test-left">
+          <h3>Нарисуйте цифру (50×50)</h3>
+          <div id="drawGrid" class="draw-grid"></div>
+          <div class="test-tools">
+            <label>Инструмент:
+              <select id="testTool">
+                <option value="pen">Ручка</option>
+                <option value="spray">Спрей</option>
+                <option value="eraser">Ластик</option>
+              </select>
+            </label>
+            <label>Размер:
+              <input type="range" id="testBrushSize" min="1" max="4" value="1">
+              <span id="testBrushValue">1</span>
+            </label>
+          </div>
+          <div class="test-controls">
+            <button id="testPredictBtn" class="btn-primary">Распознать цифру</button>
+            <button id="testClearBtn" class="btn-secondary">Очистить</button>
+            <button id="retrainBtn" class="btn-secondary" disabled>🔄 Дообучить</button>
+          </div>
+        </div>
+        
+        <div class="test-right">
+          <div id="testResult" class="test-result">Результат: -</div>
+          <h3>Обработанное изображение (28×28)</h3>
+          <div id="testPreview28" class="preview-grid"></div>
+          <div id="testConfidence" class="test-confidence"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar" id="bottomBar">
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+    <div class="menu-content" id="menuContent">
+      <div class="menu-section">
+        <button class="main-menu-button" onclick="document.location='../Main_site/index.html'">Главное меню</button>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-section algo-buttons">
+        <button class="algo-button" onclick="location.href='../First_alg_A/First_alg_A.html'">A*</button>
+        <button class="algo-button" onclick="location.href='../Clustering/cluster.html'">Кластеризация</button>
+        <button class="algo-button" onclick="location.href='../Genetic/Genetic_alg.html'">Генетический алгоритм</button>
+        <button class="algo-button" onclick="location.href='../Ant/Algorithm_ant.html'">Муравьиный алгоритм</button>
+        <button class="algo-button" onclick="location.href='../Decision_tree/Tree.html'">Дерево решений</button>
+        <button class="algo-button" onclick="location.href='../Neural_network/Neural_network.html'">Нейронная сеть</button>
+        <button class="algo-button current">Гибридный алгоритм</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer-footer">
+    <p>© 2025 Algorithm Visualizer</p>
+  </footer>
+
+  <script src="../common/page-transitions.js"></script>
+  <script src="hybrid.js"></script>
+</body>
+</html>
+

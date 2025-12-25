@@ -20,6 +20,10 @@
 
   <h1 class="page-name">Нейронная сеть</h1>
 
+  <div class="info-box">
+    <p><strong>📊 Предобученная модель:</strong> Нейронная сеть обучена на датасете MNIST (60,000 примеров). <strong>Архитектура:</strong> [128, 64] нейронов, <strong>активация:</strong> ReLU, <strong>learning rate:</strong> 0.01, <strong>20,000 итераций</strong>. <strong>Точность:</strong> ~98%. Модель можно <strong>дообучить</strong> на ваших примерах для улучшения распознавания.</p>
+  </div>
+
   <div class="container">
     <div class="main">
       <h1>Нарисуй цифру (50×50)</h1>
@@ -42,25 +46,34 @@
       <div class="controls">
         <button id="predictBtn">Угадать</button>
         <button id="clearBtn">Очистить</button>
+        <button id="retrainBtn">Дообучить</button>
       </div>
     </div>
 
     <div class="sidebar">
       <div id="result">Результат: ...</div>
+      <div id="confidence" class="confidence-box"></div>
       <h2>Сжатая цифра (28×28)</h2>
       <div id="preview28" class="preview-grid"></div>
     </div>
   </div>
 
-  <div class="bottom-bar">
-    <button class="main-menu-button" onclick="document.location='../Main_site/index.html'">Главное меню</button>
-    <div class="algo-buttons">
-      <button class="algo-button" onclick="location.href='../First_alg_A/First_alg_A.html'">A*</button>
-      <button class="algo-button" onclick="location.href='../Clustering/cluster.html'">Кластеризация</button>
-      <button class="algo-button" onclick="location.href='../Genetic/Genetic_alg.html'">Генетический алгоритм</button>
-      <button class="algo-button" onclick="location.href='../Ant/Algorithm_ant.html'">Муравьиный алгоритм</button>
-      <button class="algo-button" onclick="location.href='../Decision_tree/Tree.html'">Дерево решений</button>
-      <button class="algo-button current">Нейронная сеть</button>
+  <div class="bottom-bar" id="bottomBar">
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+    <div class="menu-content" id="menuContent">
+      <div class="menu-section">
+        <button class="main-menu-button" onclick="document.location='../Main_site/index.html'">Главное меню</button>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-section algo-buttons">
+        <button class="algo-button" onclick="location.href='../First_alg_A/First_alg_A.html'">A*</button>
+        <button class="algo-button" onclick="location.href='../Clustering/cluster.html'">Кластеризация</button>
+        <button class="algo-button" onclick="location.href='../Genetic/Genetic_alg.html'">Генетический алгоритм</button>
+        <button class="algo-button" onclick="location.href='../Ant/Algorithm_ant.html'">Муравьиный алгоритм</button>
+        <button class="algo-button" onclick="location.href='../Decision_tree/Tree.html'">Дерево решений</button>
+        <button class="algo-button current">Нейронная сеть</button>
+        <button class="algo-button" onclick="location.href='../Hybrid_GA_NN/hybrid.html'">Гибридный алгоритм</button>
+      </div>
     </div>
   </div>
 
@@ -68,6 +81,7 @@
     <p>© 2025 Algorithm Visualizer</p>
   </footer>
 
+  <script src="../common/page-transitions.js"></script>
   <script src="nn.js"></script>
 </body>
 </html>

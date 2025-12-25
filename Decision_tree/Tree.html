@@ -40,15 +40,22 @@
     <div id="result" class="result-output"></div>
   </div>
 
-  <div class="bottom-bar">
-    <button class="main-menu-button" onclick="document.location='../Main_site/index.html'">Главное меню</button>
-    <div class="algo-buttons">
-      <button class="algo-button" onclick="location.href='../First_alg_A/First_alg_A.html'">A*</button>
-      <button class="algo-button" onclick="location.href='../Clustering/cluster.html'">Кластеризация</button>
-      <button class="algo-button" onclick="location.href='../Genetic/Genetic_alg.html'">Генетический алгоритм</button>
-      <button class="algo-button" onclick="location.href='../Ant/Algorithm_ant.html'">Муравьиный алгоритм</button>
-      <button class="algo-button current">Дерево решений</button>
-      <button class="algo-button" onclick="location.href='../Neural_network/Neural_network.html'">Нейронная сеть</button>
+  <div class="bottom-bar" id="bottomBar">
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+    <div class="menu-content" id="menuContent">
+      <div class="menu-section">
+        <button class="main-menu-button" onclick="document.location='../Main_site/index.html'">Главное меню</button>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-section algo-buttons">
+        <button class="algo-button" onclick="location.href='../First_alg_A/First_alg_A.html'">A*</button>
+        <button class="algo-button" onclick="location.href='../Clustering/cluster.html'">Кластеризация</button>
+        <button class="algo-button" onclick="location.href='../Genetic/Genetic_alg.html'">Генетический алгоритм</button>
+        <button class="algo-button" onclick="location.href='../Ant/Algorithm_ant.html'">Муравьиный алгоритм</button>
+        <button class="algo-button current">Дерево решений</button>
+        <button class="algo-button" onclick="location.href='../Neural_network/Neural_network.html'">Нейронная сеть</button>
+        <button class="algo-button" onclick="location.href='../Hybrid_GA_NN/hybrid.html'">Гибридный алгоритм</button>
+      </div>
     </div>
   </div>
 
@@ -57,5 +64,37 @@
   </footer>
 
   <script src="Decision_tree.js"></script>
+  <script>
+    function toggleMenu() {
+      const menuContent = document.getElementById('menuContent');
+      const menuToggle = document.getElementById('menuToggle');
+      if (menuContent) {
+        const isActive = menuContent.classList.toggle('active');
+        if (menuToggle) {
+          if (isActive) {
+            menuToggle.style.bottom = '80px';
+          } else {
+            menuToggle.style.bottom = '15px';
+          }
+        }
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      const bottomBar = document.getElementById('bottomBar');
+      const menuToggle = document.getElementById('menuToggle');
+      const menuContent = document.getElementById('menuContent');
+      
+      if (bottomBar && menuContent && menuContent.classList.contains('active')) {
+        if (!bottomBar.contains(e.target) && e.target !== menuToggle) {
+          menuContent.classList.remove('active');
+          if (menuToggle) {
+            menuToggle.style.bottom = '15px';
+          }
+        }
+      }
+    });
+  </script>
+  <script src="../common/page-transitions.js"></script>
 </body>
 </html>
