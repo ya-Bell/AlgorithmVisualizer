@@ -1,4 +1,4 @@
-// Генетический алгоритм для оптимизации гиперпараметров нейронной сети
+// Муравьиный алгоритм для оптимизации гиперпараметров нейронной сети
 
 // Глобальные переменные
 let isRunning = false;
@@ -6,19 +6,27 @@ let shouldStop = false;
 let evolutionChart = null;
 let bestConfig = null;
 let bestAccuracy = 0;
-let generationHistory = [];
-let bestNetwork = null; // Сохраненная лучшая сеть для тестирования
+let iterationHistory = [];
+let bestNetwork = null;
 let testGridSize = 50;
 let testMouseDown = false;
 let testSprayInterval = null;
 let testLastSprayIndex = null;
+
+// Структуры для феромонов
+let pheromones = {
+  layers: {},      // Количество слоев -> феромон
+  neurons: {},     // Количество нейронов -> феромон
+  learningRate: {}, // Learning rate -> феромон
+  activation: {}    // Функция активации -> феромон
+};
 
 // Элементы интерфейса
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const resetBtn = document.getElementById('resetBtn');
 const statusDiv = document.getElementById('status');
-const currentGenDiv = document.getElementById('currentGen');
+const currentIterDiv = document.getElementById('currentIter');
 const bestAccuracyDiv = document.getElementById('bestAccuracy');
 const bestConfigDiv = document.getElementById('bestConfig');
 const networkArchDiv = document.getElementById('networkArchitecture');
@@ -27,10 +35,11 @@ const progressBar = document.getElementById('progressBar');
 const progressFill = document.getElementById('progressFill');
 
 // Параметры слайдеров
-const popSizeSlider = document.getElementById('popSize');
-const genSlider = document.getElementById('generations');
-const mutSlider = document.getElementById('mutation');
-const crossSlider = document.getElementById('crossover');
+const numAntsSlider = document.getElementById('numAnts');
+const iterSlider = document.getElementById('iterations');
+const alphaSlider = document.getElementById('alpha');
+const betaSlider = document.getElementById('beta');
+const evapSlider = document.getElementById('evaporation');
 const minLayersInput = document.getElementById('minLayers');
 const maxLayersInput = document.getElementById('maxLayers');
 const minNeuronsInput = document.getElementById('minNeurons');
@@ -42,20 +51,24 @@ const actSigmoidCheck = document.getElementById('actSigmoid');
 const actTanhCheck = document.getElementById('actTanh');
 
 // Обновление значений слайдеров
-popSizeSlider.addEventListener('input', (e) => {
-  document.getElementById('popSizeValue').textContent = e.target.value;
+numAntsSlider.addEventListener('input', (e) => {
+  document.getElementById('antsValue').textContent = e.target.value;
 });
 
-genSlider.addEventListener('input', (e) => {
-  document.getElementById('genValue').textContent = e.target.value;
+iterSlider.addEventListener('input', (e) => {
+  document.getElementById('iterValue').textContent = e.target.value;
 });
 
-mutSlider.addEventListener('input', (e) => {
-  document.getElementById('mutValue').textContent = (e.target.value / 100).toFixed(2);
+alphaSlider.addEventListener('input', (e) => {
+  document.getElementById('alphaValue').textContent = (e.target.value / 100).toFixed(1);
 });
 
-crossSlider.addEventListener('input', (e) => {
-  document.getElementById('crossValue').textContent = (e.target.value / 100).toFixed(2);
+betaSlider.addEventListener('input', (e) => {
+  document.getElementById('betaValue').textContent = (e.target.value / 100).toFixed(1);
+});
+
+evapSlider.addEventListener('input', (e) => {
+  document.getElementById('evapValue').textContent = (e.target.value / 100).toFixed(2);
 });
 
 minLayersInput.addEventListener('input', updateLayersRange);
@@ -124,7 +137,7 @@ function initChart() {
         x: {
           title: {
             display: true,
-            text: 'Поколение'
+            text: 'Итерация'
           }
         }
       }
@@ -132,8 +145,8 @@ function initChart() {
   });
 }
 
-// Генерация случайной конфигурации нейронной сети
-function generateRandomConfig() {
+// Инициализация феромонов
+function initializePheromones() {
   const minLayers = parseInt(minLayersInput.value);
   const maxLayers = parseInt(maxLayersInput.value);
   const minNeurons = parseInt(minNeuronsInput.value);
@@ -141,33 +154,126 @@ function generateRandomConfig() {
   const minLR = parseFloat(minLRInput.value);
   const maxLR = parseFloat(maxLRInput.value);
 
-  const numLayers = Math.floor(Math.random() * (maxLayers - minLayers + 1)) + minLayers;
-  const hiddenLayers = [];
-  
-  for (let i = 0; i < numLayers; i++) {
-    const neurons = Math.floor(Math.random() * (maxNeurons - minNeurons + 1)) + minNeurons;
-    // Округляем до степени 2 для удобства
-    hiddenLayers.push(Math.pow(2, Math.floor(Math.log2(neurons))));
+  // Инициализируем феромоны для слоев
+  pheromones.layers = {};
+  for (let i = minLayers; i <= maxLayers; i++) {
+    pheromones.layers[i] = 1.0;
   }
 
-  const learningRate = minLR + Math.random() * (maxLR - minLR);
-  
-  // Выбираем случайную функцию активации из выбранных
+  // Инициализируем феромоны для нейронов (дискретные значения)
+  pheromones.neurons = {};
+  for (let n = minNeurons; n <= maxNeurons; n += 16) {
+    const rounded = Math.pow(2, Math.floor(Math.log2(n)));
+    pheromones.neurons[rounded] = 1.0;
+  }
+
+  // Инициализируем феромоны для learning rate (дискретные значения)
+  pheromones.learningRate = {};
+  const lrStep = (maxLR - minLR) / 20;
+  for (let lr = minLR; lr <= maxLR; lr += lrStep) {
+    const rounded = Math.round(lr * 1000) / 1000;
+    pheromones.learningRate[rounded] = 1.0;
+  }
+
+  // Инициализируем феромоны для активации
+  pheromones.activation = {};
   const availableActivations = [];
   if (actReluCheck && actReluCheck.checked) availableActivations.push('relu');
   if (actSigmoidCheck && actSigmoidCheck.checked) availableActivations.push('sigmoid');
   if (actTanhCheck && actTanhCheck.checked) availableActivations.push('tanh');
   
-  // Если ничего не выбрано, используем relu по умолчанию
-  // Также проверяем, что элементы существуют (для безопасности)
-  let activation = 'relu';
-  if (availableActivations.length > 0) {
-    activation = availableActivations[Math.floor(Math.random() * availableActivations.length)];
-  } else if (actReluCheck || actSigmoidCheck || actTanhCheck) {
-    // Если элементы есть, но ничего не выбрано - используем relu
-    activation = 'relu';
+  if (availableActivations.length === 0) {
+    availableActivations.push('relu');
   }
   
+  availableActivations.forEach(act => {
+    pheromones.activation[act] = 1.0;
+  });
+}
+
+// Выбор значения на основе феромонов и эвристики (вероятностный выбор)
+function selectByPheromone(options, pheromoneMap, alpha, beta, heuristicFn = null) {
+  if (options.length === 0) return null;
+  if (options.length === 1) return options[0];
+
+  // Вычисляем вероятности для каждого варианта
+  const probabilities = options.map(option => {
+    const pheromone = pheromoneMap[option] || 0.1; // Минимальное значение, если нет феромона
+    const heuristic = heuristicFn ? heuristicFn(option) : 1.0;
+    // Используем формулу: pheromone^alpha * heuristic^beta
+    return Math.pow(Math.max(0.1, pheromone), alpha) * Math.pow(heuristic, beta);
+  });
+
+  const total = probabilities.reduce((a, b) => a + b, 0);
+  if (total === 0 || !isFinite(total)) {
+    return options[Math.floor(Math.random() * options.length)];
+  }
+
+  const normalized = probabilities.map(p => p / total);
+  
+  // Вероятностный выбор
+  let rand = Math.random();
+  let sum = 0;
+  for (let i = 0; i < normalized.length; i++) {
+    sum += normalized[i];
+    if (rand <= sum) {
+      return options[i];
+    }
+  }
+  
+  return options[options.length - 1];
+}
+
+// Генерация конфигурации муравьем (на основе феромонов)
+function generateAntConfig() {
+  const minLayers = parseInt(minLayersInput.value);
+  const maxLayers = parseInt(maxLayersInput.value);
+  const minNeurons = parseInt(minNeuronsInput.value);
+  const maxNeurons = parseInt(maxNeuronsInput.value);
+  const minLR = parseFloat(minLRInput.value);
+  const maxLR = parseFloat(maxLRInput.value);
+  
+  const alpha = parseFloat(alphaSlider.value) / 100;
+  const beta = parseFloat(betaSlider.value) / 100;
+
+  // Выбираем количество слоев
+  const layerOptions = [];
+  for (let i = minLayers; i <= maxLayers; i++) {
+    layerOptions.push(i);
+  }
+  const numLayers = selectByPheromone(layerOptions, pheromones.layers, alpha, beta);
+
+  // Выбираем нейроны для каждого слоя
+  const hiddenLayers = [];
+  const neuronOptions = Object.keys(pheromones.neurons).map(Number).filter(n => n >= minNeurons && n <= maxNeurons);
+  
+  for (let i = 0; i < numLayers; i++) {
+    if (neuronOptions.length > 0) {
+      const neurons = selectByPheromone(neuronOptions, pheromones.neurons, alpha, beta);
+      hiddenLayers.push(neurons);
+    } else {
+      // Fallback: случайный выбор
+      const neurons = Math.floor(Math.random() * (maxNeurons - minNeurons + 1)) + minNeurons;
+      hiddenLayers.push(Math.pow(2, Math.floor(Math.log2(neurons))));
+    }
+  }
+
+  // Выбираем learning rate
+  const lrOptions = Object.keys(pheromones.learningRate).map(Number).filter(lr => lr >= minLR && lr <= maxLR);
+  let learningRate;
+  if (lrOptions.length > 0) {
+    learningRate = selectByPheromone(lrOptions, pheromones.learningRate, alpha, beta);
+  } else {
+    learningRate = minLR + Math.random() * (maxLR - minLR);
+  }
+
+  // Выбираем функцию активации
+  const activationOptions = Object.keys(pheromones.activation);
+  let activation = 'relu';
+  if (activationOptions.length > 0) {
+    activation = selectByPheromone(activationOptions, pheromones.activation, alpha, beta);
+  }
+
   return {
     hiddenLayers: hiddenLayers,
     learningRate: learningRate,
@@ -175,27 +281,76 @@ function generateRandomConfig() {
   };
 }
 
-// Кодирование конфигурации в хромосому (для генетического алгоритма)
-function encodeConfig(config) {
-  return {
-    layers: config.hiddenLayers,
-    learningRate: config.learningRate,
-    activation: config.activation
-  };
-}
+// Обновление феромонов на основе результатов
+function updatePheromones(configs, accuracies) {
+  const evaporationRate = parseFloat(evapSlider.value) / 100;
 
-// Декодирование хромосомы в конфигурацию
-function decodeConfig(chromosome) {
-  return {
-    hiddenLayers: chromosome.layers,
-    learningRate: chromosome.learningRate,
-    activation: chromosome.activation || 'relu' // Используем из хромосомы или relu по умолчанию
-  };
+  // Испарение феромонов
+  Object.keys(pheromones.layers).forEach(key => {
+    pheromones.layers[key] *= (1 - evaporationRate);
+    pheromones.layers[key] = Math.max(0.1, pheromones.layers[key]); // Минимальное значение
+  });
+  Object.keys(pheromones.neurons).forEach(key => {
+    pheromones.neurons[key] *= (1 - evaporationRate);
+    pheromones.neurons[key] = Math.max(0.1, pheromones.neurons[key]);
+  });
+  Object.keys(pheromones.learningRate).forEach(key => {
+    pheromones.learningRate[key] *= (1 - evaporationRate);
+    pheromones.learningRate[key] = Math.max(0.1, pheromones.learningRate[key]);
+  });
+  Object.keys(pheromones.activation).forEach(key => {
+    pheromones.activation[key] *= (1 - evaporationRate);
+    pheromones.activation[key] = Math.max(0.1, pheromones.activation[key]);
+  });
+
+  // Добавление феромонов на основе точности (увеличиваем количество)
+  configs.forEach((config, index) => {
+    const accuracy = accuracies[index];
+    // Увеличиваем количество феромонов: чем выше точность, тем больше феромонов
+    // Используем квадрат точности для усиления эффекта хороших решений
+    const pheromoneAmount = (accuracy / 100) * (accuracy / 100) * 10; // Увеличено в 10 раз
+
+    // Обновляем феромоны для слоев
+    const numLayers = config.hiddenLayers.length;
+    if (!pheromones.layers[numLayers]) {
+      pheromones.layers[numLayers] = 0.1;
+    }
+    pheromones.layers[numLayers] += pheromoneAmount;
+
+    // Обновляем феромоны для нейронов
+    config.hiddenLayers.forEach(neurons => {
+      const rounded = Math.pow(2, Math.floor(Math.log2(neurons)));
+      if (!pheromones.neurons[rounded]) {
+        pheromones.neurons[rounded] = 0.1;
+      }
+      pheromones.neurons[rounded] += pheromoneAmount;
+    });
+
+    // Обновляем феромоны для learning rate
+    const roundedLR = Math.round(config.learningRate * 1000) / 1000;
+    if (!pheromones.learningRate[roundedLR]) {
+      pheromones.learningRate[roundedLR] = 0.1;
+    }
+    pheromones.learningRate[roundedLR] += pheromoneAmount;
+
+    // Обновляем феромоны для активации
+    if (!pheromones.activation[config.activation]) {
+      pheromones.activation[config.activation] = 0.1;
+    }
+    pheromones.activation[config.activation] += pheromoneAmount;
+  });
 }
 
 // Создание и обучение нейронной сети (неблокирующее)
 async function trainNetwork(config, trainingData, testData) {
   return new Promise((resolve) => {
+    // Проверка на остановку перед началом
+    if (shouldStop) {
+      console.log('Обучение прервано: shouldStop = true');
+      resolve({ accuracy: 0, network: null });
+      return;
+    }
+
     const net = new brain.NeuralNetwork({
       hiddenLayers: config.hiddenLayers,
       activation: config.activation || 'relu',
@@ -217,11 +372,33 @@ async function trainNetwork(config, trainingData, testData) {
 
     // Используем setTimeout для неблокирующего обучения
     setTimeout(() => {
+      // Проверка на остановку перед обучением
+      if (shouldStop) {
+        console.log('Обучение прервано перед net.train: shouldStop = true');
+        resolve({ accuracy: 0, network: null });
+        return;
+      }
+
       try {
+        console.log('Начало обучения сети...', config);
         net.train(trainingData, trainingOptions);
+        console.log('Обучение завершено');
+
+        // Проверка на остановку после обучения
+        if (shouldStop) {
+          console.log('Обучение прервано после net.train: shouldStop = true');
+          resolve({ accuracy: 0, network: null });
+          return;
+        }
 
         // Тестирование (тоже с задержкой)
         setTimeout(() => {
+          if (shouldStop) {
+            console.log('Тестирование прервано: shouldStop = true');
+            resolve({ accuracy: 0, network: null });
+            return;
+          }
+
           let correct = 0;
           // Для MNIST используем больше тестовых данных
           const dataSource = document.querySelector('input[name="dataSource"]:checked')?.value || 'synthetic';
@@ -230,6 +407,7 @@ async function trainNetwork(config, trainingData, testData) {
             : Math.min(100, testData.length);
           
           for (let i = 0; i < testSize; i++) {
+            if (shouldStop) break; // Прерываем тестирование при остановке
             const output = net.run(testData[i].input);
             const predicted = Object.entries(output).reduce((a, b) => a[1] > b[1] ? a : b)[0];
             const expected = testData[i].output.findIndex(v => v === 1).toString();
@@ -237,13 +415,14 @@ async function trainNetwork(config, trainingData, testData) {
           }
 
           const accuracy = (correct / testSize) * 100;
+          console.log('Тестирование завершено, точность:', accuracy);
           resolve({ accuracy, network: net });
         }, 10);
       } catch (error) {
         console.error('Ошибка обучения:', error);
         resolve({ accuracy: 0, network: net });
       }
-    }, 10);
+    }, 50);
   });
 }
 
@@ -449,100 +628,6 @@ function generateTestData(size = 200) {
   return data;
 }
 
-// Кроссовер двух конфигураций
-function crossover(parent1, parent2) {
-  const layers1 = [...parent1.layers];
-  const layers2 = [...parent2.layers];
-  
-  // Одноточечный кроссовер
-  const minLen = Math.min(layers1.length, layers2.length);
-  if (minLen > 1) {
-    const point = Math.floor(Math.random() * (minLen - 1)) + 1;
-    const childLayers = [...layers1.slice(0, point), ...layers2.slice(point)];
-    
-    // Смешиваем learning rate
-    const avgLR = (parent1.learningRate + parent2.learningRate) / 2;
-    
-    // Выбираем активацию от одного из родителей (случайно)
-    const activation = Math.random() < 0.5 
-      ? (parent1.activation || 'relu') 
-      : (parent2.activation || 'relu');
-    
-    return {
-      layers: childLayers,
-      learningRate: avgLR,
-      activation: activation
-    };
-  }
-  
-  return {
-    layers: layers1,
-    learningRate: parent1.learningRate,
-    activation: parent1.activation || 'relu'
-  };
-}
-
-// Мутация конфигурации
-function mutate(chromosome) {
-  const minLayers = parseInt(minLayersInput.value);
-  const maxLayers = parseInt(maxLayersInput.value);
-  const minNeurons = parseInt(minNeuronsInput.value);
-  const maxNeurons = parseInt(maxNeuronsInput.value);
-  const minLR = parseFloat(minLRInput.value);
-  const maxLR = parseFloat(maxLRInput.value);
-
-  const mutated = { ...chromosome };
-
-  // Мутация количества слоев
-  if (Math.random() < 0.3) {
-    const newNumLayers = Math.max(minLayers, Math.min(maxLayers, 
-      mutated.layers.length + (Math.random() < 0.5 ? -1 : 1)));
-    
-    if (newNumLayers !== mutated.layers.length) {
-      if (newNumLayers > mutated.layers.length) {
-        const neurons = Math.floor(Math.random() * (maxNeurons - minNeurons + 1)) + minNeurons;
-        mutated.layers.push(Math.pow(2, Math.floor(Math.log2(neurons))));
-      } else {
-        mutated.layers.pop();
-      }
-    }
-  }
-
-  // Мутация количества нейронов в случайном слое
-  if (mutated.layers.length > 0 && Math.random() < 0.5) {
-    const layerIndex = Math.floor(Math.random() * mutated.layers.length);
-    const neurons = Math.floor(Math.random() * (maxNeurons - minNeurons + 1)) + minNeurons;
-    mutated.layers[layerIndex] = Math.pow(2, Math.floor(Math.log2(neurons)));
-  }
-
-  // Мутация learning rate
-  if (Math.random() < 0.4) {
-    const mutationAmount = (maxLR - minLR) * 0.1;
-    mutated.learningRate = Math.max(minLR, Math.min(maxLR, 
-      mutated.learningRate + (Math.random() - 0.5) * mutationAmount));
-  }
-
-  // Мутация функции активации
-  if (Math.random() < 0.2) { // 20% вероятность мутации активации
-    const availableActivations = [];
-    if (actReluCheck && actReluCheck.checked) availableActivations.push('relu');
-    if (actSigmoidCheck && actSigmoidCheck.checked) availableActivations.push('sigmoid');
-    if (actTanhCheck && actTanhCheck.checked) availableActivations.push('tanh');
-    
-    if (availableActivations.length > 1) {
-      // Выбираем случайную активацию, отличную от текущей
-      const otherActivations = availableActivations.filter(a => a !== mutated.activation);
-      if (otherActivations.length > 0) {
-        mutated.activation = otherActivations[Math.floor(Math.random() * otherActivations.length)];
-      }
-    } else if (availableActivations.length === 1) {
-      mutated.activation = availableActivations[0];
-    }
-  }
-
-  return mutated;
-}
-
 // Основной алгоритм оптимизации
 async function runOptimization() {
   if (isRunning) return;
@@ -551,7 +636,7 @@ async function runOptimization() {
   bestNetwork = null;
   bestAccuracy = 0;
   bestConfig = null;
-  generationHistory = [];
+  iterationHistory = [];
   
   // Скрываем секцию тестирования
   const testSection = document.getElementById('testSection');
@@ -566,202 +651,261 @@ async function runOptimization() {
   progressBar.style.display = 'block';
   updateProgress(0);
   
-  const popSize = parseInt(popSizeSlider.value);
-  const maxGenerations = parseInt(genSlider.value);
-  const mutationProb = parseFloat(mutSlider.value) / 100;
-  const crossoverProb = parseFloat(crossSlider.value) / 100;
+  const numAnts = parseInt(numAntsSlider.value);
+  const maxIterations = parseInt(iterSlider.value);
   
-  // Общее количество шагов для прогресс-бара
-  const totalSteps = popSize + (maxGenerations * (popSize - Math.floor(popSize * 0.1)));
+  // Учитываем начальную популяцию (3 сети) + все итерации
+  const initialPopSize = Math.min(3, numAnts);
+  const totalSteps = initialPopSize + (maxIterations * numAnts);
   let currentStep = 0;
 
-  // Генерация тестовых данных (оптимизировано для скорости)
   // Генерация тестовых данных
   statusDiv.textContent = '🔄 Генерация тестовых данных...';
   
-  // Проверяем источник данных
   const dataSource = document.querySelector('input[name="dataSource"]:checked')?.value || 'synthetic';
   let trainingData, testData;
   
   if (dataSource === 'mnist' && typeof mnist !== 'undefined') {
-    // Используем реальные данные MNIST
     statusDiv.textContent = '🔄 Загрузка данных MNIST...';
-    const mnistSet = mnist.set(1000, 200); // 1000 для обучения, 200 для теста (можно увеличить)
+    const mnistSet = mnist.set(1000, 200);
     trainingData = mnistSet.training;
     testData = mnistSet.test;
     statusDiv.textContent = '✅ Данные MNIST загружены!';
   } else {
-    // Используем синтетические данные
-    trainingData = generateTestData(200);
-    testData = generateTestData(100);
+    // Увеличиваем количество данных для лучшего обучения
+    trainingData = generateTestData(300);
+    testData = generateTestData(150);
   }
 
-  // Инициализация популяции
-  statusDiv.textContent = '🧬 Создание начальной популяции...';
-  let population = [];
-  for (let i = 0; i < popSize; i++) {
-    const config = generateRandomConfig();
-    population.push({
-      chromosome: encodeConfig(config),
-      config: config,
-      fitness: 0
-    });
-  }
+  // Инициализация феромонов
+  initializePheromones();
 
-      // Оценка начальной популяции (с задержками для UI)
-  statusDiv.textContent = '🎓 Обучение начальной популяции нейронных сетей...';
-  for (let i = 0; i < population.length; i++) {
-    if (shouldStop) break;
-    statusDiv.textContent = `🎓 Обучение сети ${i + 1}/${popSize}...`;
+  iterationHistory = [];
+  bestAccuracy = 0;
+  bestConfig = null;
+  bestNetwork = null;
+
+  // Начальная случайная популяция для лучшей инициализации (уменьшаем до 3 для ускорения)
+  statusDiv.textContent = '🐜 Создание начальной случайной популяции...';
+  const initialConfigs = [];
+  const initialResults = [];
+  
+  for (let i = 0; i < initialPopSize && !shouldStop; i++) {
+    if (shouldStop) {
+      console.log('Прерывание инициализации: shouldStop = true');
+      break;
+    }
+    
+    statusDiv.textContent = `🐜 Инициализация: обучение сети ${i + 1}/${initialPopSize}...`;
     currentStep++;
     updateProgress((currentStep / totalSteps) * 100);
     
-      // Добавляем небольшую задержку для обновления UI
+    // Добавляем небольшую задержку для обновления UI
     await new Promise(resolve => setTimeout(resolve, 200)); // Увеличено для лучшего UI
     
-    const result = await trainNetwork(population[i].config, trainingData, testData);
-    population[i].fitness = result.accuracy;
-    population[i].network = result.network; // Сохраняем сеть
+    if (shouldStop) {
+      console.log('Прерывание после задержки: shouldStop = true');
+      break;
+    }
     
-    // Обновляем лучшую сеть
-    if (result.accuracy > bestAccuracy) {
+    // Генерируем полностью случайную конфигурацию
+    const minLayers = parseInt(minLayersInput.value);
+    const maxLayers = parseInt(maxLayersInput.value);
+    const minNeurons = parseInt(minNeuronsInput.value);
+    const maxNeurons = parseInt(maxNeuronsInput.value);
+    const minLR = parseFloat(minLRInput.value);
+    const maxLR = parseFloat(maxLRInput.value);
+    
+    const numLayers = Math.floor(Math.random() * (maxLayers - minLayers + 1)) + minLayers;
+    const hiddenLayers = [];
+    for (let j = 0; j < numLayers; j++) {
+      const neurons = Math.floor(Math.random() * (maxNeurons - minNeurons + 1)) + minNeurons;
+      hiddenLayers.push(Math.pow(2, Math.floor(Math.log2(neurons))));
+    }
+    
+    const learningRate = minLR + Math.random() * (maxLR - minLR);
+    const availableActivations = [];
+    if (actReluCheck && actReluCheck.checked) availableActivations.push('relu');
+    if (actSigmoidCheck && actSigmoidCheck.checked) availableActivations.push('sigmoid');
+    if (actTanhCheck && actTanhCheck.checked) availableActivations.push('tanh');
+    const activation = availableActivations.length > 0 
+      ? availableActivations[Math.floor(Math.random() * availableActivations.length)]
+      : 'relu';
+    
+    const config = { hiddenLayers, learningRate, activation };
+    
+    if (shouldStop) {
+      console.log('Прерывание перед обучением: shouldStop = true');
+      break;
+    }
+    
+    console.log(`Обучение сети ${i + 1}/${initialPopSize}...`);
+    const result = await trainNetwork(config, trainingData, testData);
+    
+    if (shouldStop) {
+      console.log('Прерывание после обучения: shouldStop = true');
+      break;
+    }
+    
+    initialConfigs.push(config);
+    initialResults.push({
+      config: config,
+      accuracy: result.accuracy,
+      network: result.network
+    });
+
+    // Обновляем лучшую конфигурацию (но после сортировки все равно синхронизируем с топ-1)
+    if (result.accuracy >= bestAccuracy) {
       bestAccuracy = result.accuracy;
-      bestConfig = population[i].config;
+      bestConfig = config;
       bestNetwork = result.network;
       updateBestConfigDisplay();
     }
   }
-
-  // Сортируем начальную популяцию перед первым поколением
-  population.sort((a, b) => b.fitness - a.fitness);
   
-  // Устанавливаем лучшую конфигурацию из начальной популяции
-  // Всегда синхронизируем с топ-1 после сортировки
-  if (population[0].fitness >= bestAccuracy) {
-    bestAccuracy = population[0].fitness;
-    bestConfig = population[0].config;
-    if (population[0].network) {
-      bestNetwork = population[0].network;
-    }
-    updateBestConfigDisplay();
-  }
-  
-  updateTopConfigs(population);
+  // Элитизм: сохраняем лучшие конфигурации между итерациями
+  let eliteConfigs = [];
 
-  generationHistory = [];
-
-  // Эволюция
-  for (let gen = 0; gen < maxGenerations && !shouldStop; gen++) {
-    currentGenDiv.textContent = `Поколение: ${gen + 1}/${maxGenerations}`;
-    statusDiv.textContent = `🧬 Поколение ${gen + 1}: оценка и селекция лучших сетей...`;
-
-    // Сортировка по фитнесу
-    population.sort((a, b) => b.fitness - a.fitness);
-
-    // Обновление лучшей конфигурации
-    // Всегда синхронизируем с топ-1 после сортировки
-    if (population[0].fitness >= bestAccuracy) {
-      bestAccuracy = population[0].fitness;
-      bestConfig = population[0].config;
-      
-      // Сохраняем лучшую сеть для тестирования
-      if (population[0].network) {
-        bestNetwork = population[0].network;
+  // Обновляем феромоны на основе начальной популяции
+  if (initialConfigs.length > 0) {
+    const initialAccuracies = initialResults.map(r => r.accuracy);
+    updatePheromones(initialConfigs, initialAccuracies);
+    
+    // Сохраняем лучшие конфигурации как элитные
+    initialResults.sort((a, b) => b.accuracy - a.accuracy);
+    eliteConfigs = initialResults.slice(0, 2);
+    
+    // Синхронизируем лучшую конфигурацию с топ-1 после сортировки
+    if (initialResults.length > 0 && initialResults[0].accuracy >= bestAccuracy) {
+      bestAccuracy = initialResults[0].accuracy;
+      bestConfig = initialResults[0].config;
+      if (initialResults[0].network) {
+        bestNetwork = initialResults[0].network;
       }
-      
       updateBestConfigDisplay();
     }
-
-    // Вычисление средней точности
-    const avgFitness = population.reduce((sum, p) => sum + p.fitness, 0) / population.length;
-
-    // Обновление графика
-    generationHistory.push({
-      generation: gen + 1,
-      best: bestAccuracy,
-      average: avgFitness
-    });
-    updateChart();
-
-    // Создание нового поколения
-    const newPopulation = [];
     
-    // Элитизм: сохраняем лучших
-    const eliteSize = Math.floor(popSize * 0.1);
-    for (let i = 0; i < eliteSize; i++) {
-      newPopulation.push({ ...population[i] });
+    // Обновляем топ-5 конфигураций
+    updateTopConfigs(initialResults.slice(0, 5));
+  }
+
+  // Основной цикл итераций
+  for (let iter = 0; iter < maxIterations && !shouldStop; iter++) {
+    currentIterDiv.textContent = `Итерация: ${iter + 1}/${maxIterations}`;
+    statusDiv.textContent = `🐜 Итерация ${iter + 1}: создание конфигураций муравьями...`;
+
+    const configs = [];
+    const results = [];
+
+    // В первой итерации добавляем элитные конфигурации (если есть)
+    if (iter === 0 && eliteConfigs.length > 0) {
+      for (let i = 0; i < Math.min(1, eliteConfigs.length); i++) {
+        const elite = eliteConfigs[i];
+        statusDiv.textContent = `🐜 Итерация ${iter + 1}: переобучение элитной конфигурации ${i + 1}...`;
+        currentStep++;
+        updateProgress((currentStep / totalSteps) * 100);
+        
+        // Добавляем небольшую задержку для обновления UI
+        await new Promise(resolve => setTimeout(resolve, 200)); // Увеличено для лучшего UI
+        
+        const result = await trainNetwork(elite.config, trainingData, testData);
+        configs.push(elite.config);
+        results.push({
+          config: elite.config,
+          accuracy: result.accuracy,
+          network: result.network
+        });
+
+        if (result.accuracy > bestAccuracy) {
+          bestAccuracy = result.accuracy;
+          bestConfig = elite.config;
+          bestNetwork = result.network;
+          updateBestConfigDisplay();
+        }
+      }
     }
 
-    // Генерация потомков
-    const childrenNeeded = popSize - newPopulation.length;
-    let childIndex = 0;
-    while (newPopulation.length < popSize) {
-      if (shouldStop) break;
-
-      // Селекция (турнирная)
-      const parent1 = population[Math.floor(Math.random() * Math.min(10, popSize))];
-      const parent2 = population[Math.floor(Math.random() * Math.min(10, popSize))];
-
-      let childChromosome;
-      if (Math.random() < crossoverProb) {
-        childChromosome = crossover(parent1.chromosome, parent2.chromosome);
-      } else {
-        childChromosome = { ...parent1.chromosome };
+    // Каждый муравей создает конфигурацию и обучает сеть
+    // В первой итерации, если есть элитные конфигурации, создаем меньше муравьев
+    const eliteCount = (iter === 0 && eliteConfigs.length > 0) ? Math.min(1, eliteConfigs.length) : 0;
+    const antsToCreate = numAnts - eliteCount;
+    
+    for (let ant = 0; ant < antsToCreate && !shouldStop; ant++) {
+      if (shouldStop) {
+        console.log('Прерывание цикла муравьев: shouldStop = true');
+        break;
       }
-
-      // Мутация
-      if (Math.random() < mutationProb) {
-        childChromosome = mutate(childChromosome);
-      }
-
-      const childConfig = decodeConfig(childChromosome);
-      const child = {
-        chromosome: childChromosome,
-        config: childConfig,
-        fitness: 0
-      };
-
-      // Оценка потомка
-      childIndex++;
-      statusDiv.textContent = `🧬 Поколение ${gen + 1}: создание и обучение потомка ${childIndex}/${childrenNeeded}...`;
+      
+      statusDiv.textContent = `🐜 Итерация ${iter + 1}: обучение сети муравья ${ant + 1}/${numAnts}...`;
       currentStep++;
       updateProgress((currentStep / totalSteps) * 100);
       
       // Добавляем задержку для обновления UI
       await new Promise(resolve => setTimeout(resolve, 200)); // Увеличено для лучшего UI
       
-      const result = await trainNetwork(childConfig, trainingData, testData);
-      child.fitness = result.accuracy;
-      child.network = result.network; // Сохраняем сеть
-
-      newPopulation.push(child);
+      if (shouldStop) {
+        console.log('Прерывание после задержки в цикле муравьев: shouldStop = true');
+        break;
+      }
       
-      // Обновляем лучшую сеть, если это лучший потомок
-      // (но после сортировки все равно синхронизируем с топ-1)
-      if (child.fitness >= bestAccuracy) {
-        bestAccuracy = child.fitness;
-        bestConfig = child.config;
+      const config = generateAntConfig();
+      console.log(`Обучение сети муравья ${ant + 1}/${numAnts} (antsToCreate: ${antsToCreate})...`);
+      const result = await trainNetwork(config, trainingData, testData);
+      
+      if (shouldStop) {
+        console.log('Прерывание после обучения муравья: shouldStop = true');
+        break;
+      }
+      
+      configs.push(config);
+      results.push({
+        config: config,
+        accuracy: result.accuracy,
+        network: result.network
+      });
+
+      // Обновляем лучшую конфигурацию
+      if (result.accuracy > bestAccuracy) {
+        bestAccuracy = result.accuracy;
+        bestConfig = config;
         bestNetwork = result.network;
         updateBestConfigDisplay();
       }
     }
 
-    population = newPopulation;
-    // Сортируем перед отображением
-    population.sort((a, b) => b.fitness - a.fitness);
+    // Обновляем феромоны на основе результатов
+    const accuracies = results.map(r => r.accuracy);
+    updatePheromones(configs, accuracies);
+
+    // Обновляем элитные конфигурации (топ-2 для ускорения)
+    results.sort((a, b) => b.accuracy - a.accuracy);
+    eliteConfigs = results.slice(0, 2);
+
+    // Вычисление средней точности
+    const avgAccuracy = accuracies.reduce((sum, a) => sum + a, 0) / accuracies.length;
+
+    // Обновление графика
+    iterationHistory.push({
+      iteration: iter + 1,
+      best: bestAccuracy,
+      average: avgAccuracy
+    });
+    updateChart();
+
+    // Обновление топ-5 конфигураций
+    results.sort((a, b) => b.accuracy - a.accuracy);
     
-    // Обновляем лучшую конфигурацию после сортировки
-    // Всегда синхронизируем с топ-1 после сортировки
-    if (population[0].fitness >= bestAccuracy) {
-      bestAccuracy = population[0].fitness;
-      bestConfig = population[0].config;
-      if (population[0].network) {
-        bestNetwork = population[0].network;
+    // Синхронизируем лучшую конфигурацию с топ-1 после сортировки
+    if (results.length > 0 && results[0].accuracy >= bestAccuracy) {
+      bestAccuracy = results[0].accuracy;
+      bestConfig = results[0].config;
+      if (results[0].network) {
+        bestNetwork = results[0].network;
       }
       updateBestConfigDisplay();
     }
     
-    updateTopConfigs(population);
+    updateTopConfigs(results.slice(0, 5));
   }
 
   isRunning = false;
@@ -769,23 +913,9 @@ async function runOptimization() {
   stopBtn.disabled = false;
   updateProgress(100);
   
-  // Финальная сортировка и обновление
-  if (population.length > 0) {
-    population.sort((a, b) => b.fitness - a.fitness);
-    
-    // Обновляем лучшую конфигурацию из финальной популяции
-    // Всегда синхронизируем с топ-1 после сортировки
-    if (population[0].fitness >= bestAccuracy) {
-      bestAccuracy = population[0].fitness;
-      bestConfig = population[0].config;
-      if (population[0].network) {
-        bestNetwork = population[0].network;
-      }
-    }
-    
-    updateBestConfigDisplay();
-    updateTopConfigs(population);
-  }
+  // Финальная синхронизация - находим лучшую конфигурацию из всех итераций
+  // (но это уже сделано в цикле, просто убеждаемся что все обновлено)
+  updateBestConfigDisplay();
   
   if (shouldStop) {
     statusDiv.textContent = '⏸ Оптимизация остановлена пользователем';
@@ -809,7 +939,6 @@ async function runOptimization() {
       if (retrainBtn) retrainBtn.disabled = false;
     }
     
-    // Активируем кнопку сохранения
     const saveModelBtn = document.getElementById('saveModelBtn');
     if (saveModelBtn) saveModelBtn.disabled = false;
   }
@@ -819,7 +948,6 @@ async function runOptimization() {
   }, 2000);
 }
 
-// Обновление прогресс-бара
 function updateProgress(percent) {
   if (progressFill) {
     progressFill.style.width = percent + '%';
@@ -827,7 +955,6 @@ function updateProgress(percent) {
   }
 }
 
-// Обновление отображения лучшей конфигурации
 function updateBestConfigDisplay() {
   if (!bestConfig || bestAccuracy === 0) {
     bestAccuracyDiv.textContent = 'Лучшая точность: -';
@@ -849,13 +976,12 @@ function updateBestConfigDisplay() {
   bestConfigDiv.textContent = `Лучшая конфигурация: ${configText}`;
 }
 
-// Обновление графика
 function updateChart() {
   if (!evolutionChart) return;
 
-  const labels = generationHistory.map(h => h.generation);
-  const bestData = generationHistory.map(h => h.best);
-  const avgData = generationHistory.map(h => h.average);
+  const labels = iterationHistory.map(h => h.iteration);
+  const bestData = iterationHistory.map(h => h.best);
+  const avgData = iterationHistory.map(h => h.average);
 
   evolutionChart.data.labels = labels;
   evolutionChart.data.datasets[0].data = bestData;
@@ -863,17 +989,15 @@ function updateChart() {
   evolutionChart.update();
 }
 
-// Обновление топ-5 конфигураций
-function updateTopConfigs(population) {
-  const top5 = population.slice(0, 5);
+function updateTopConfigs(results) {
   let html = '';
-  top5.forEach((ind, index) => {
+  results.forEach((result, index) => {
     const isBest = index === 0;
     html += `<div class="config-item ${isBest ? 'best' : ''}">`;
-    html += `<strong>#${index + 1}</strong> Точность: ${ind.fitness.toFixed(2)}%<br>`;
-    html += `Слои: [${ind.config.hiddenLayers.join(', ')}], `;
-    html += `LR: ${ind.config.learningRate.toFixed(4)}, `;
-    html += `Активация: ${ind.config.activation || 'relu'}`;
+    html += `<strong>#${index + 1}</strong> Точность: ${result.accuracy.toFixed(2)}%<br>`;
+    html += `Слои: [${result.config.hiddenLayers.join(', ')}], `;
+    html += `LR: ${result.config.learningRate.toFixed(4)}, `;
+    html += `Активация: ${result.config.activation || 'relu'}`;
     html += `</div>`;
   });
   topConfigsDiv.innerHTML = html;
@@ -885,18 +1009,21 @@ startBtn.addEventListener('click', () => {
 });
 
 stopBtn.addEventListener('click', () => {
+  console.log('Кнопка остановки нажата!');
   shouldStop = true;
   stopBtn.disabled = true;
-  statusDiv.textContent = '⏸ Остановка оптимизации...';
+  if (statusDiv) statusDiv.textContent = '⏸ Остановка оптимизации...';
+  console.log('shouldStop установлен в true');
 });
 
 resetBtn.addEventListener('click', () => {
   if (isRunning) return;
   
-  generationHistory = [];
+  iterationHistory = [];
   bestAccuracy = 0;
   bestConfig = null;
-  bestNetwork = null; // Сбрасываем сеть
+  bestNetwork = null;
+  initializePheromones();
   
   // Скрываем секцию тестирования
   const testSection = document.getElementById('testSection');
@@ -918,21 +1045,20 @@ resetBtn.addEventListener('click', () => {
   }
   
   statusDiv.textContent = 'Готов к запуску';
-  currentGenDiv.textContent = 'Поколение: -';
+  currentIterDiv.textContent = 'Итерация: -';
   bestAccuracyDiv.textContent = 'Лучшая точность: -';
   bestConfigDiv.textContent = 'Лучшая конфигурация: -';
   networkArchDiv.textContent = '-';
   topConfigsDiv.innerHTML = '-';
 });
 
-// Функции для тестирования сети
+// Функции для тестирования сети (из оригинального кода)
 function initTestDrawing() {
   const drawGrid = document.getElementById('drawGrid');
   if (!drawGrid) return;
   
   drawGrid.innerHTML = '';
   
-  // Создаем сетку для рисования
   for (let i = 0; i < testGridSize * testGridSize; i++) {
     const pixel = document.createElement('div');
     pixel.classList.add('draw-pixel');
@@ -963,7 +1089,6 @@ function initTestDrawing() {
     drawGrid.appendChild(pixel);
   }
   
-  // Инициализация превью
   const preview = document.getElementById('testPreview28');
   if (preview) {
     preview.innerHTML = '';
@@ -1048,7 +1173,6 @@ function stopTestSpray() {
   testLastSprayIndex = null;
 }
 
-// Функции обработки изображения (из nn.js)
 function centerAndNormalize(input, width, height, targetSize = 28) {
   let top = height, bottom = 0, left = width, right = 0;
   for (let y = 0; y < height; y++) {
@@ -1117,7 +1241,6 @@ function resizeInputAvg(input, width, height, newWidth, newHeight) {
   return resized;
 }
 
-// Обработчик кнопки распознавания
 document.addEventListener('DOMContentLoaded', () => {
   const testPredictBtn = document.getElementById('testPredictBtn');
   const testClearBtn = document.getElementById('testClearBtn');
@@ -1137,7 +1260,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const resizedInput = centerAndNormalize(compressed, 28, 28);
       const normalized = resizedInput.map(v => Math.min(1, v * 2.5));
       
-      // Показываем превью
       const preview = document.getElementById('testPreview28');
       preview.innerHTML = '';
       normalized.forEach(val => {
@@ -1148,7 +1270,6 @@ document.addEventListener('DOMContentLoaded', () => {
         preview.appendChild(pixel);
       });
       
-      // Распознавание
       const output = bestNetwork.run(normalized);
       const predicted = Object.entries(output).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
       
@@ -1164,17 +1285,16 @@ document.addEventListener('DOMContentLoaded', () => {
         normalizedOutput[digit] = sum > 0 ? Math.max(0, value / sum) : 0; // Нормализуем от 0 до 1
       });
       
-      const confidence = normalizedOutput[predicted] * 100; // Для отображения в процентах
+      const confidence = normalizedOutput[predicted] * 100;
       
       document.getElementById('testResult').textContent = `Результат: ${predicted} (уверенность: ${confidence.toFixed(1)}%)`;
       
-      // Показываем уверенность для всех цифр (нормализованную)
       const confidenceDiv = document.getElementById('testConfidence');
       let confidenceHTML = '<strong>Вероятности по всем цифрам:</strong>';
       Object.entries(normalizedOutput)
         .sort((a, b) => b[1] - a[1])
         .forEach(([digit, conf]) => {
-          const percent = (conf * 100).toFixed(1); // Преобразуем в проценты
+          const percent = (conf * 100).toFixed(1);
           const isPredicted = digit === predicted;
           confidenceHTML += `
             <div class="confidence-item" style="${isPredicted ? 'font-weight: 600; color: #667eea;' : ''}">
@@ -1217,7 +1337,6 @@ document.addEventListener('DOMContentLoaded', () => {
     stopTestSpray();
   });
   
-  // Обработчик сохранения модели
   const saveModelBtn = document.getElementById('saveModelBtn');
   if (saveModelBtn) {
     saveModelBtn.addEventListener('click', () => {
@@ -1231,17 +1350,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `optimized_model_${bestAccuracy.toFixed(1)}_accuracy.json`;
+      a.download = `optimized_model_ant_${bestAccuracy.toFixed(1)}_accuracy.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      alert(`Модель сохранена! Точность: ${bestAccuracy.toFixed(2)}%\nФайл: optimized_model_${bestAccuracy.toFixed(1)}_accuracy.json`);
+      alert(`Модель сохранена! Точность: ${bestAccuracy.toFixed(2)}%\nФайл: optimized_model_ant_${bestAccuracy.toFixed(1)}_accuracy.json`);
     });
   }
   
-  // Обработчик дообучения
   const retrainBtn = document.getElementById('retrainBtn');
   if (retrainBtn) {
     retrainBtn.addEventListener('click', async () => {
@@ -1261,7 +1379,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const resizedInput = centerAndNormalize(compressed, 28, 28);
       const normalized = resizedInput.map(v => Math.min(1, v * 2.5));
       
-      // Спрашиваем правильный ответ
       const correctDigit = prompt('Какую цифру вы нарисовали? (0-9):');
       if (correctDigit === null || isNaN(correctDigit) || correctDigit < 0 || correctDigit > 9) {
         return;
@@ -1270,7 +1387,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const output = new Array(10).fill(0);
       output[parseInt(correctDigit)] = 1;
       
-      // Дообучаем сеть на этом примере
       retrainBtn.disabled = true;
       retrainBtn.textContent = '🔄 Дообучение...';
       
@@ -1290,20 +1406,18 @@ document.addEventListener('DOMContentLoaded', () => {
       
       alert('Модель дообучена! Попробуйте распознать цифру снова.');
       
-      // Автоматически распознаем снова
       const testPredictBtn = document.getElementById('testPredictBtn');
       if (testPredictBtn) testPredictBtn.click();
     });
   }
 });
 
-// Функция для переключения меню
-function toggleMenu() {
+// Функция для переключения меню (должна быть глобальной для onclick)
+window.toggleMenu = function() {
   const menuContent = document.getElementById('menuContent');
   const menuToggle = document.getElementById('menuToggle');
   if (menuContent) {
     const isActive = menuContent.classList.toggle('active');
-    // Поднимаем/опускаем кнопку вместе с меню
     if (menuToggle) {
       if (isActive) {
         menuToggle.style.bottom = '80px';
@@ -1312,9 +1426,8 @@ function toggleMenu() {
       }
     }
   }
-}
+};
 
-// Закрытие меню при клике вне его
 document.addEventListener('click', (e) => {
   const bottomBar = document.getElementById('bottomBar');
   const menuToggle = document.getElementById('menuToggle');
@@ -1323,24 +1436,6 @@ document.addEventListener('click', (e) => {
   if (bottomBar && menuContent && menuContent.classList.contains('active')) {
     if (!bottomBar.contains(e.target) && e.target !== menuToggle) {
       menuContent.classList.remove('active');
-      // Опускаем кнопку обратно
-      if (menuToggle) {
-        menuToggle.style.bottom = '15px';
-      }
-    }
-  }
-});
-
-// Закрытие меню при клике вне его
-document.addEventListener('click', (e) => {
-  const bottomBar = document.getElementById('bottomBar');
-  const menuToggle = document.getElementById('menuToggle');
-  const menuContent = document.getElementById('menuContent');
-  
-  if (bottomBar && menuContent && menuContent.classList.contains('active')) {
-    if (!bottomBar.contains(e.target) && e.target !== menuToggle) {
-      menuContent.classList.remove('active');
-      // Опускаем кнопку обратно
       if (menuToggle) {
         menuToggle.style.bottom = '15px';
       }
@@ -1362,5 +1457,6 @@ window.addEventListener('DOMContentLoaded', () => {
   updateLayersRange();
   updateNeuronsRange();
   updateLRRange();
+  initializePheromones();
 });
 

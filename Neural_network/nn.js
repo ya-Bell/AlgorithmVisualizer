@@ -302,10 +302,15 @@ document.getElementById('predictBtn').addEventListener('click', () => {
   const confidenceDiv = document.getElementById('confidence');
   if (confidenceDiv) {
     // Нормализуем вероятности (сумма = 100%)
-    const sum = Object.values(output).reduce((a, b) => a + b, 0);
+    // Убеждаемся, что все значения неотрицательные
+    const positiveOutput = {};
+    Object.entries(output).forEach(([digit, value]) => {
+      positiveOutput[digit] = Math.max(0, value); // Гарантируем неотрицательность
+    });
+    const sum = Object.values(positiveOutput).reduce((a, b) => a + b, 0);
     const normalizedOutput = {};
-    Object.keys(output).forEach(key => {
-      normalizedOutput[key] = sum > 0 ? output[key] / sum : 0;
+    Object.entries(positiveOutput).forEach(([digit, value]) => {
+      normalizedOutput[digit] = sum > 0 ? Math.max(0, value / sum) : 0; // Нормализуем от 0 до 1
     });
     
     let confidenceHTML = '<strong>Вероятности по всем цифрам:</strong>';

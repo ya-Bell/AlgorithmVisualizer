@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Гибридный алгоритм: ГА + НС</title>
-  <link rel="stylesheet" href="hybrid.css">
+  <title>Гибридный алгоритм: МА + НС</title>
+  <link rel="stylesheet" href="hybrid_ant.css">
   <script src="https://unpkg.com/brain.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mnist@1.1.0/dist/mnist.min.js"></script>
@@ -21,7 +21,7 @@
   </header>
 
   <div class="container">
-    <h1 class="title">Оптимизация нейронной сети генетическим алгоритмом</h1>
+    <h1 class="title">Оптимизация нейронной сети муравьиным алгоритмом</h1>
     <p class="subtitle">Автоматический подбор гиперпараметров нейронной сети для распознавания цифр</p>
 
     <div class="info-box">
@@ -29,7 +29,7 @@
       <ol>
         <li><strong>Настройте параметры</strong> (или оставьте значения по умолчанию)</li>
         <li><strong>Нажмите "Запустить оптимизацию"</strong> - алгоритм начнет искать лучшие параметры</li>
-        <li><strong>Наблюдайте за процессом:</strong> генетический алгоритм создает популяцию конфигураций, обучает сети и выбирает лучшие</li>
+        <li><strong>Наблюдайте за процессом:</strong> муравьиный алгоритм создает конфигурации, обучает сети и оставляет феромоны на лучших решениях</li>
         <li><strong>Смотрите результаты:</strong> график показывает улучшение точности, внизу - лучшие конфигурации</li>
         <li><strong>Протестируйте сеть:</strong> после оптимизации нарисуйте цифру и проверьте результат</li>
       </ol>
@@ -39,22 +39,26 @@
     <div class="main-content">
       <div class="left-panel">
         <div class="config-section">
-          <h2>Параметры генетического алгоритма</h2>
+          <h2>Параметры муравьиного алгоритма</h2>
           <div class="param-group">
-            <label>Размер популяции: <span id="popSizeValue">10</span></label>
-            <input type="range" id="popSize" min="5" max="30" value="10">
+            <label>Количество муравьев: <span id="antsValue">10</span></label>
+            <input type="range" id="numAnts" min="5" max="30" value="10">
           </div>
           <div class="param-group">
-            <label>Количество поколений: <span id="genValue">5</span></label>
-            <input type="range" id="generations" min="3" max="15" value="5">
+            <label>Количество итераций: <span id="iterValue">5</span></label>
+            <input type="range" id="iterations" min="3" max="15" value="5">
           </div>
           <div class="param-group">
-            <label>Вероятность мутации: <span id="mutValue">0.1</span></label>
-            <input type="range" id="mutation" min="0" max="100" value="10" step="5">
+            <label>Коэффициент альфа (важность феромонов): <span id="alphaValue">1.0</span></label>
+            <input type="range" id="alpha" min="0" max="200" value="100" step="10">
           </div>
           <div class="param-group">
-            <label>Вероятность кроссовера: <span id="crossValue">0.8</span></label>
-            <input type="range" id="crossover" min="0" max="100" value="80" step="5">
+            <label>Коэффициент бета (важность эвристики): <span id="betaValue">2.0</span></label>
+            <input type="range" id="beta" min="0" max="200" value="200" step="10">
+          </div>
+          <div class="param-group">
+            <label>Скорость испарения феромонов: <span id="evapValue">0.5</span></label>
+            <input type="range" id="evaporation" min="0" max="100" value="50" step="5">
           </div>
         </div>
 
@@ -123,7 +127,7 @@
 
         <div class="status-section">
           <div id="status">Готов к запуску</div>
-          <div id="currentGen">Поколение: -</div>
+          <div id="currentIter">Итерация: -</div>
           <div id="bestAccuracy">Лучшая точность: -</div>
           <div id="bestConfig">Лучшая конфигурация: -</div>
           <div id="progressBar" style="display: none; margin-top: 15px;">
@@ -205,8 +209,8 @@
         <button class="algo-button" onclick="location.href='../Ant/Algorithm_ant.html'">Муравьиный алгоритм</button>
         <button class="algo-button" onclick="location.href='../Decision_tree/Tree.html'">Дерево решений</button>
         <button class="algo-button" onclick="location.href='../Neural_network/Neural_network.html'">Нейронная сеть</button>
-        <button class="algo-button current">Гибридный: ГА + НС</button>
-        <button class="algo-button" onclick="location.href='../Hybrid_ACO_NN/hybrid_ant.html'">Гибридный: МА + НС</button>
+        <button class="algo-button" onclick="location.href='../Hybrid_GA_NN/hybrid.html'">Гибридный: ГА + НС</button>
+        <button class="algo-button current">Гибридный: МА + НС</button>
       </div>
     </div>
   </div>
@@ -216,7 +220,7 @@
   </footer>
 
   <script src="../common/page-transitions.js"></script>
-  <script src="hybrid.js"></script>
+  <script src="hybrid_ant.js"></script>
 </body>
 </html>
 
